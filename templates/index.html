@@ -1,251 +1,129 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Port Scanner eXtreme - PSX</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Orbitron', sans-serif;
-      background: #0f0f0f;
-      color: #e0e0e0;
-      overflow-x: hidden;
-    }
-
-    header {
-      padding: 2rem;
-      background: linear-gradient(145deg, #0f2027, #203a43, #2c5364);
-      color: #00ffe0;
-      text-align: center;
-      font-size: 2rem;
-      letter-spacing: 1px;
-      border-bottom: 2px solid #00ffe0;
-    }
-
-    .section {
-      padding: 2rem 5%;
-    }
-
-    .section-title {
-      font-size: 1.8rem;
-      margin-bottom: 1rem;
-      color: #00ffc6;
-      border-left: 5px solid #00ffc6;
-      padding-left: 0.8rem;
-    }
-
-    .glow-on-hover {
-      transition: 0.3s ease-in-out;
-    }
-
-    .glow-on-hover:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 0 20px #00ffe0;
-    }
-
-    .input-area {
-      display: flex;
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-    }
-
-    input[type="text"] {
-      padding: 0.7rem;
-      width: 300px;
-      border: none;
-      border-radius: 5px;
-      background: #1c1c1c;
-      color: #fff;
-      outline: none;
-    }
-
-    button {
-      padding: 0.7rem 1.5rem;
-      background: #00ffc6;
-      border: none;
-      border-radius: 5px;
-      color: #000;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .result-box {
-      background: #1a1a1a;
-      margin: 1rem 0;
-      padding: 1rem;
-      border-radius: 8px;
-      border-left: 5px solid;
-      transition: transform 0.2s;
-    }
-
-    .result-box:hover {
-      transform: scale(1.02);
-    }
-
-    #loading-screen {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0, 0, 0, 0.85);
-      z-index: 9999;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-    }
-
-    .clock-loader {
-      width: 80px;
-      height: 80px;
-      border: 10px solid #00ffc6;
-      border-radius: 50%;
-      border-top-color: transparent;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    #permission-modal {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0, 0, 0, 0.85);
-      z-index: 9998;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .modal-box {
-      background: #1a1a1a;
-      padding: 2rem;
-      border-radius: 8px;
-      max-width: 400px;
-      color: #fff;
-    }
-
-    .modal-box h3 {
-      margin-bottom: 1rem;
-      color: #ffe156;
-    }
-
-    .modal-box label {
-      display: block;
-      margin: 0.5rem 0;
-    }
-
-    .reference-box {
-      margin-bottom: 1rem;
-    }
-
-    footer {
-      background: #111;
-      padding: 2rem;
-      text-align: center;
-      color: #999;
-      border-top: 1px solid #333;
-    }
-
-    footer h3 {
-      color: #00ffc6;
-      margin-bottom: 0.5rem;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>PSX – Port Scanner eXtreme</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(to right, #0f0c29, #302b63, #24243e);
+            color: #fff;
+            font-family: 'Orbitron', sans-serif;
+        }
+        .neon {
+            text-shadow: 0 0 5px #fff, 0 0 10px #0ff, 0 0 20px #0ff, 0 0 40px #0ff;
+        }
+        .scanner-card {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .scanner-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 0 20px #00ffff;
+        }
+        .threat-level-box {
+            border-left: 8px solid;
+            padding-left: 1rem;
+            margin-bottom: 1rem;
+        }
+        #loading-screen {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.95);
+            justify-content: center;
+            align-items: center;
+        }
+        .clock-loader {
+            --clock-color: #00ffff;
+            width: 100px;
+            height: 100px;
+            border: 6px solid transparent;
+            border-top: 6px solid var(--clock-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        .contact-section {
+            background: #191919;
+            padding: 2rem;
+            margin-top: 3rem;
+            border-radius: 10px;
+        }
+    </style>
 </head>
 <body>
-  <header>
-    Port Scanner eXtreme - PSX
-  </header>
+<div class="container mt-5">
+    <h1 class="text-center neon">Port Scanner eXtreme – PSX</h1>
+    <form id="scan-form" class="text-center mt-4">
+        <input type="text" id="host" class="form-control mb-3" placeholder="Enter IP address or domain" required>
+        <button type="submit" class="btn btn-primary">Start Scan</button>
+    </form>
+    <div id="scan-results" class="mt-4"></div>
 
-  <section class="section">
-    <div class="section-title">🔍 Scanner</div>
-    <div class="input-area">
-      <input id="host-input" type="text" placeholder="Enter IP or domain..." />
-      <button class="glow-on-hover" onclick="showPermission()">Scan</button>
+    <div class="contact-section mt-5">
+        <h3 class="neon">Contact Us</h3>
+        <p>Email: rishabsolemn@gmail.com</p>
+        <p>Phone: +91 77329 00007</p>
+        <p>GitHub: <a href="https://github.com/Rishabsolemn" class="text-info">Rishabsolemn</a></p>
+        <p>LinkedIn: <a href="https://linkedin.com/in/rishabravikumar" class="text-info">Rishab Ravikumar</a></p>
     </div>
-    <div id="scan-results"></div>
-  </section>
+</div>
 
-  <section class="section">
-    <div class="section-title">📊 Threat Reference</div>
-    {% for level, data in threat_levels.items() %}
-      <div class="reference-box" style="border-left: 5px solid {{ data[2] }}; padding-left: 1rem;">
-        <strong>{{ data[0] }}</strong><br/>
-        <span>{{ data[1] }}</span>
-      </div>
-    {% endfor %}
-  </section>
-
-  <section class="section">
-    <div class="section-title">📞 Contact Us</div>
-    <p><strong>Email:</strong> rishabsolemn@gmail.com</p>
-    <p><strong>Phone:</strong> +91 77329 00007</p>
-    <p><strong>GitHub:</strong> Rishabsolemn</p>
-    <p><strong>LinkedIn:</strong> Rishab Ravikumar</p>
-  </section>
-
-  <div id="loading-screen">
+<div id="loading-screen">
     <div class="clock-loader"></div>
-    <p style="margin-top: 1rem;">Scanning ports...</p>
-  </div>
+</div>
 
-  <div id="permission-modal">
-    <div class="modal-box">
-      <h3>Permission Required</h3>
-      <label><input type="checkbox" id="age-check"> I am 16 or older</label>
-      <label><input type="checkbox" id="intent-check"> I understand the purpose is educational</label>
-      <label><input type="checkbox" id="consent-check"> I accept full responsibility for any unauthorized scans</label>
-      <button onclick="submitPermission()">Yes, I Accept</button>
-    </div>
-  </div>
+<!-- Scripts -->
+<script>
+    document.getElementById("scan-form").addEventListener("submit", function(e) {
+        e.preventDefault();
+        const host = document.getElementById("host").value.trim();
+        if (!host) return;
 
-  <script>
-    function showPermission() {
-      document.getElementById("permission-modal").style.display = "flex";
-    }
+        const confirmScan = confirm("This scanner is for educational use only. Are you 16+ and accept full responsibility?");
+        if (!confirmScan) return;
 
-    function submitPermission() {
-      const age = document.getElementById("age-check").checked;
-      const intent = document.getElementById("intent-check").checked;
-      const consent = document.getElementById("consent-check").checked;
-      if (age && intent && consent) {
-        document.getElementById("permission-modal").style.display = "none";
-        startScan();
-      } else {
-        alert("Please check all boxes to proceed.");
-      }
-    }
+        document.getElementById("loading-screen").style.display = "flex";
+        fetch("/scan", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ host })
+        }).then(res => res.json()).then(data => {
+            document.getElementById("loading-screen").style.display = "none";
+            const resultDiv = document.getElementById("scan-results");
+            if (data.error) {
+                resultDiv.innerHTML = "<div class='alert alert-danger'>" + data.error + "</div>";
+                return;
+            }
 
-    async function startScan() {
-      const host = document.getElementById("host-input").value;
-      if (!host) return alert("Please enter a domain or IP");
-      document.getElementById("loading-screen").style.display = "flex";
-
-      const res = await fetch("/scan", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ host })
-      });
-      const data = await res.json();
-      document.getElementById("loading-screen").style.display = "none";
-
-      const resultsDiv = document.getElementById("scan-results");
-      resultsDiv.innerHTML = `<h3>Scan Results for ${data.host} (${data.ip})</h3>`;
-      data.results.forEach(r => {
-        resultsDiv.innerHTML += `
-          <div class="result-box glow-on-hover" style="border-color: ${r.color}">
-            <strong>Port:</strong> ${r.port} - ${r.description}<br/>
-            <strong>Status:</strong> ${r.status}<br/>
-            <strong>Threat Level:</strong> ${r.threat_name} - ${r.threat_description}
-          </div>`;
-      });
-    }
-  </script>
+            resultDiv.innerHTML = `<h4>Scan Results for ${data.host} (${data.ip})</h4>`;
+            data.results.forEach(r => {
+                const box = document.createElement("div");
+                box.className = "threat-level-box";
+                box.style.borderColor = r.color;
+                box.innerHTML = `
+                    <strong>Port ${r.port} (${r.description})</strong>: <span class="text-info">${r.status}</span><br>
+                    Threat: <span style="color:${r.color}">${r.threat_name}</span> – ${r.threat_description}
+                `;
+                resultDiv.appendChild(box);
+            });
+        }).catch(err => {
+            document.getElementById("loading-screen").style.display = "none";
+            document.getElementById("scan-results").innerHTML = "<div class='alert alert-danger'>An error occurred</div>";
+            console.error(err);
+        });
+    });
+</script>
 </body>
 </html>
