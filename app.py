@@ -2,11 +2,12 @@ from flask import Flask, render_template, request
 from flask_socketio import SocketIO
 import socket
 import threading
+import os
 
 app = Flask(__name__)
 socketio = SocketIO(app)
 
-# Threat level calculator
+# Calculate threat level
 def calculate_threat_level(open_ports):
     dangerous_ports = {21, 23, 445, 3389}
     if any(p in open_ports for p in dangerous_ports):
@@ -16,10 +17,12 @@ def calculate_threat_level(open_ports):
     else:
         return "Low"
 
-# Port scanning function
+# Scan function
 def scan_ports(domain, port_range, sid):
     open_ports = []
     start, end = port_range
+
+    socketio.emit('log', f"Starting scan on {domain}", room=sid)
 
     for port in range(start, end + 1):
         try:
@@ -50,11 +53,7 @@ def handle_scan(data):
     thread = threading.Thread(target=scan_ports, args=(domain, (start, end), request.sid))
     thread.start()
 
-if __name__ == '__main__':
-    socketio.run(app, debug=True)
-
-import os
-
+# ✅ Correct port binding for Render
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     socketio.run(app, host='0.0.0.0', port=port)
