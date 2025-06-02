@@ -1,206 +1,124 @@
-from flask import Flask, request, render_template_string, send_file
+from flask import Flask, request, render_template_string
 import socket
 import os
-import json
-import datetime
-import requests
-from io import BytesIO
 
 app = Flask(__name__)
 
-# Common service mapping
-COMMON_SERVICES = {
-    21: "FTP", 22: "SSH", 23: "Telnet", 25: "SMTP", 53: "DNS",
-    80: "HTTP", 110: "POP3", 143: "IMAP", 443: "HTTPS",
-    3306: "MySQL", 8080: "HTTP Proxy"
-}
+SAFE_PORTS = [20, 21, 22, 23, 25, 53, 80, 110, 143, 443, 3306]
 
-HTML_TEMPLATE = """<!DOCTYPE html>
-<html lang="en" data-theme="dark">
+html_template = """
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>PSX – Port Scanner eXtreme</title>
-    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
     <style>
-        :root {
-            color-scheme: dark;
-        }
         body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', sans-serif;
-            background-color: #121212;
-            color: #e0e0e0;
-        }
-        .container {
-            max-width: 800px;
-            margin: auto;
-            padding: 2em;
-            position: relative;
-            z-index: 1;
+            background: #0d0d0d;
+            color: #f1f1f1;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 40px;
         }
         h1 {
             font-size: 2.5em;
-            color: #00ffff;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, #ff007f, #00f2ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
         form {
-            margin-top: 1em;
-            display: flex;
-            flex-direction: column;
+            margin-bottom: 20px;
         }
-        input, button {
-            margin: 0.5em 0;
+        input[type=text] {
             padding: 10px;
-            font-size: 1em;
+            width: 300px;
             border: none;
-            border-radius: 5px;
+            border-radius: 6px;
+            margin-right: 10px;
         }
-        input[type=text], input[type=number] {
-            background: #1e1e1e;
-            color: #fff;
-        }
-        button {
-            background: #00ffff;
-            color: #000;
+        input[type=submit] {
+            padding: 10px 20px;
+            background-color: #ff007f;
+            color: white;
+            border: none;
+            border-radius: 6px;
             cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        input[type=submit]:hover {
+            background-color: #e6006f;
         }
         .result {
             background: #1e1e1e;
-            margin-top: 1em;
-            padding: 1em;
+            padding: 20px;
             border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(255, 0, 128, 0.3);
         }
-        .status-open {
-            color: #00ff00;
+        .loader {
+            display: none;
+            margin-top: 30px;
+            text-align: center;
         }
-        .status-closed {
-            color: #ff3333;
+        .orb {
+            width: 40px;
+            height: 40px;
+            background: #00f2ff;
+            border-radius: 50%;
+            animation: pulse 1s infinite ease-in-out;
+            margin: 0 auto 10px;
         }
-        .status-error {
-            color: #ffaa00;
-        }
-        #particles-js {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-        }
-        .toggle-theme {
-            position: fixed;
-            top: 1em;
-            right: 1em;
-            background: #00ffff;
-            color: #000;
-            padding: 0.5em;
-            border-radius: 10px;
-            cursor: pointer;
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.4); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.8; }
         }
     </style>
-</head>
-<body>
-    <div id="particles-js"></div>
-    <div class="container">
-        <h1>🔒 PSX – Port Scanner eXtreme</h1>
-        <p>Fast, Flexible, and Free Network Scanning</p>
-        <form method="POST">
-            <input type="text" name="host" placeholder="Enter IP or domain" required>
-            <input type="number" name="start_port" placeholder="Start Port (default 20)" min="1" max="65535">
-            <input type="number" name="end_port" placeholder="End Port (default 1024)" min="1" max="65535">
-            <label><input type="checkbox" name="stealth"> Stealth mode (slower)</label>
-            <button type="submit">Scan</button>
-        </form>
-        {% if results %}
-            <div class="result">
-                <h2>Results for {{ host }}</h2>
-                <p><strong>Geo Info:</strong> {{ geo_info }}</p>
-                <ul>
-                    {% for port, status in results.items() %}
-                        <li>
-                            Port {{ port }} -
-                            <span class="status-{{ status[1] }}">
-                                {{ status[0] }}{% if status[2] %} ({{ status[2] }}){% endif %}
-                            </span>
-                        </li>
-                    {% endfor %}
-                </ul>
-                <form action="/export" method="post">
-                    <input type="hidden" name="host" value="{{ host }}">
-                    <input type="hidden" name="scan_data" value='{{ results | tojson }}'>
-                    <button type="submit">Download Report</button>
-                </form>
-            </div>
-        {% endif %}
-    </div>
-    <div class="toggle-theme" onclick="toggleTheme()">🌓 Toggle Theme</div>
     <script>
-        particlesJS.load('particles-js', 'https://cdn.jsdelivr.net/gh/VincentGarreau/particles.js/particles.json');
-        function toggleTheme() {
-            let html = document.querySelector("html");
-            html.dataset.theme = html.dataset.theme === "dark" ? "light" : "dark";
+        function showLoader() {
+            document.getElementById("loader").style.display = "block";
         }
     </script>
+</head>
+<body>
+    <h1>PSX – Port Scanner eXtreme</h1>
+    <form method="post" onsubmit="showLoader()">
+        <input type="text" name="host" placeholder="Enter IP or hostname" required>
+        <input type="submit" value="Scan">
+    </form>
+    <div id="loader" class="loader">
+        <div class="orb"></div>
+        <p>Scanning with eXtreme precision...</p>
+    </div>
+    {% if results is not none %}
+    <div class="result">
+        <h2>Results for {{ host }}</h2>
+        <ul>
+        {% for port, status in results.items() %}
+            <li>Port {{ port }}: {{ status }}</li>
+        {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
 </body>
 </html>
 """
 
 @app.route("/", methods=["GET", "POST"])
 def index():
-    results = {}
-    geo_info = "Unavailable"
-    host = ""
+    results = None
+    host = None
     if request.method == "POST":
         host = request.form["host"]
-        start_port = int(request.form.get("start_port") or 20)
-        end_port = int(request.form.get("end_port") or 1024)
-        stealth = "stealth" in request.form
-
-        timeout = 1 if stealth else 0.3
-
-        try:
-            ip = socket.gethostbyname(host)
-            geo_info = get_geo_info(ip)
-        except:
-            geo_info = "Invalid host"
-
-        for port in range(start_port, end_port + 1):
+        results = {}
+        for port in SAFE_PORTS:
             try:
                 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                    s.settimeout(timeout)
+                    s.settimeout(0.5)
                     result = s.connect_ex((host, port))
-                    status = "Open" if result == 0 else "Closed"
-                    style = "open" if result == 0 else "closed"
-                    service = COMMON_SERVICES.get(port, "")
-                    results[port] = (status, style, service)
+                    results[port] = "Open" if result == 0 else "Closed"
             except Exception as e:
-                results[port] = (f"Error: {str(e)}", "error", "")
-
-    return render_template_string(HTML_TEMPLATE, results=results, geo_info=geo_info, host=host)
-
-@app.route("/export", methods=["POST"])
-def export():
-    host = request.form["host"]
-    scan_data = json.loads(request.form["scan_data"])
-    timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    filename = f"PSX_Report_{host}_{timestamp}.txt"
-
-    content = f"PSX Scan Report for {host} – {timestamp}\n\n"
-    for port, (status, _, service) in scan_data.items():
-        content += f"Port {port}: {status}"
-        if service:
-            content += f" ({service})"
-        content += "\n"
-
-    return send_file(BytesIO(content.encode()), download_name=filename, as_attachment=True)
-
-def get_geo_info(ip):
-    try:
-        res = requests.get(f"https://ipapi.co/{ip}/json/")
-        data = res.json()
-        return f"{data.get('country_name', '?')} - {data.get('org', '?')}"
-    except:
-        return "Geo lookup failed"
+                results[port] = f"Error: {str(e)}"
+    return render_template_string(html_template, results=results, host=host)
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
