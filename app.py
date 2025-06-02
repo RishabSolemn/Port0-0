@@ -21,8 +21,6 @@ def scan_ports(domain, port_range, sid):
     open_ports = []
     start, end = port_range
 
-    socketio.emit('log', f"Starting scan on {domain}", room=sid)
-
     for port in range(start, end + 1):
         try:
             s = socket.socket()
