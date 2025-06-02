@@ -1,129 +1,241 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>PSX – Port Scanner eXtreme</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap" rel="stylesheet">
     <style>
         body {
-            background: linear-gradient(to right, #0f0c29, #302b63, #24243e);
-            color: #fff;
-            font-family: 'Orbitron', sans-serif;
+            background: #0e0e10;
+            color: #e0e0e0;
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
         }
-        .neon {
-            text-shadow: 0 0 5px #fff, 0 0 10px #0ff, 0 0 20px #0ff, 0 0 40px #0ff;
+
+        header {
+            background: linear-gradient(90deg, #3a3d5e, #131313);
+            padding: 20px;
+            text-align: center;
+            color: #00ffc6;
+            font-size: 2rem;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px #00ffc6;
         }
-        .scanner-card {
+
+        section {
+            padding: 30px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid #555;
+            padding: 20px;
+            margin: 10px;
+            border-radius: 10px;
             transition: transform 0.3s, box-shadow 0.3s;
         }
-        .scanner-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 0 20px #00ffff;
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 15px #00ffc6;
         }
-        .threat-level-box {
-            border-left: 8px solid;
-            padding-left: 1rem;
-            margin-bottom: 1rem;
+
+        #results {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-evenly;
         }
-        #loading-screen {
-            display: none;
+
+        .btn {
+            background: #00ffc6;
+            border: none;
+            padding: 10px 20px;
+            color: black;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: #00a18d;
+        }
+
+        .modal {
             position: fixed;
-            z-index: 9999;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(0, 0, 0, 0.95);
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: none;
             justify-content: center;
             align-items: center;
+            z-index: 999;
         }
-        .clock-loader {
-            --clock-color: #00ffff;
+
+        .modal-content {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            color: #fff;
+        }
+
+        .modal-content h3 {
+            margin-top: 0;
+            color: #00ffc6;
+        }
+
+        .threat-reference {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 10px;
+        }
+
+        .loading-screen {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: white;
+        }
+
+        .spinner {
             width: 100px;
             height: 100px;
-            border: 6px solid transparent;
-            border-top: 6px solid var(--clock-color);
+            border: 10px solid #00ffc6;
+            border-top-color: transparent;
             border-radius: 50%;
-            animation: spin 1s linear infinite;
+            animation: spin 1.2s linear infinite;
+            margin-bottom: 20px;
         }
+
         @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
+            to { transform: rotate(360deg); }
         }
-        .contact-section {
-            background: #191919;
-            padding: 2rem;
-            margin-top: 3rem;
-            border-radius: 10px;
+
+        footer {
+            background: #1c1c1c;
+            padding: 20px;
+            color: #bbb;
+            text-align: center;
         }
+
     </style>
 </head>
 <body>
-<div class="container mt-5">
-    <h1 class="text-center neon">Port Scanner eXtreme – PSX</h1>
-    <form id="scan-form" class="text-center mt-4">
-        <input type="text" id="host" class="form-control mb-3" placeholder="Enter IP address or domain" required>
-        <button type="submit" class="btn btn-primary">Start Scan</button>
-    </form>
-    <div id="scan-results" class="mt-4"></div>
 
-    <div class="contact-section mt-5">
-        <h3 class="neon">Contact Us</h3>
-        <p>Email: rishabsolemn@gmail.com</p>
-        <p>Phone: +91 77329 00007</p>
-        <p>GitHub: <a href="https://github.com/Rishabsolemn" class="text-info">Rishabsolemn</a></p>
-        <p>LinkedIn: <a href="https://linkedin.com/in/rishabravikumar" class="text-info">Rishab Ravikumar</a></p>
+<header>🌀 PSX – Port Scanner eXtreme</header>
+
+<section>
+    <h2>Start a Scan</h2>
+    <input type="text" id="hostInput" placeholder="Enter domain or IP" />
+    <button class="btn" onclick="askPermission()">Scan</button>
+</section>
+
+<section>
+    <h2>Threat Level Reference</h2>
+    <div class="threat-reference" id="reference">
+        <!-- Threat levels will load here -->
+    </div>
+</section>
+
+<section>
+    <h2>Scan Results</h2>
+    <div id="results"></div>
+</section>
+
+<section>
+    <h2>Contact Us</h2>
+    <p>Email: rishabsolemn@gmail.com</p>
+    <p>Phone: +91 77329 0007</p>
+    <p>GitHub: Rishabsolemn</p>
+    <p>LinkedIn: Rishab Ravikumar</p>
+</section>
+
+<footer>© 2025 Port Scanner eXtreme – PSX</footer>
+
+<div class="modal" id="permissionModal">
+    <div class="modal-content">
+        <h3>User Agreement</h3>
+        <p>Why are you using this tool?</p>
+        <input type="text" placeholder="Reason" id="reason"><br><br>
+        <p>Are you 16+ years old?</p>
+        <input type="checkbox" id="ageCheck" /> Yes<br><br>
+        <p>Do you accept full responsibility for scanning only with permission?</p>
+        <input type="checkbox" id="legalCheck" /> Yes<br><br>
+        <button class="btn" onclick="confirmPermission()">Yes, I Accept</button>
     </div>
 </div>
 
-<div id="loading-screen">
-    <div class="clock-loader"></div>
+<div class="loading-screen" id="loadingScreen">
+    <div class="spinner"></div>
+    <p>Scanning... please wait</p>
 </div>
 
-<!-- Scripts -->
 <script>
-    document.getElementById("scan-form").addEventListener("submit", function(e) {
-        e.preventDefault();
-        const host = document.getElementById("host").value.trim();
-        if (!host) return;
+    const threatLevels = {{ threat_levels|tojson }};
 
-        const confirmScan = confirm("This scanner is for educational use only. Are you 16+ and accept full responsibility?");
-        if (!confirmScan) return;
-
-        document.getElementById("loading-screen").style.display = "flex";
-        fetch("/scan", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ host })
-        }).then(res => res.json()).then(data => {
-            document.getElementById("loading-screen").style.display = "none";
-            const resultDiv = document.getElementById("scan-results");
-            if (data.error) {
-                resultDiv.innerHTML = "<div class='alert alert-danger'>" + data.error + "</div>";
-                return;
-            }
-
-            resultDiv.innerHTML = `<h4>Scan Results for ${data.host} (${data.ip})</h4>`;
-            data.results.forEach(r => {
-                const box = document.createElement("div");
-                box.className = "threat-level-box";
-                box.style.borderColor = r.color;
-                box.innerHTML = `
-                    <strong>Port ${r.port} (${r.description})</strong>: <span class="text-info">${r.status}</span><br>
-                    Threat: <span style="color:${r.color}">${r.threat_name}</span> – ${r.threat_description}
-                `;
-                resultDiv.appendChild(box);
-            });
-        }).catch(err => {
-            document.getElementById("loading-screen").style.display = "none";
-            document.getElementById("scan-results").innerHTML = "<div class='alert alert-danger'>An error occurred</div>";
-            console.error(err);
+    window.onload = () => {
+        const ref = document.getElementById("reference");
+        Object.entries(threatLevels).forEach(([key, val]) => {
+            const card = document.createElement("div");
+            card.className = "card";
+            card.style.borderColor = val[2];
+            card.innerHTML = `
+                <h4 style="color:${val[2]}">${val[0]}</h4>
+                <p>${val[1]}</p>`;
+            ref.appendChild(card);
         });
-    });
+    };
+
+    function askPermission() {
+        document.getElementById("permissionModal").style.display = "flex";
+    }
+
+    function confirmPermission() {
+        const age = document.getElementById("ageCheck").checked;
+        const legal = document.getElementById("legalCheck").checked;
+        if (age && legal) {
+            document.getElementById("permissionModal").style.display = "none";
+            document.getElementById("loadingScreen").style.display = "flex";
+            startScan();
+        } else {
+            alert("You must confirm all conditions to proceed.");
+        }
+    }
+
+    function startScan() {
+        const host = document.getElementById("hostInput").value;
+        fetch('/scan', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({host})
+        }).then(res => res.json()).then(data => {
+            document.getElementById("loadingScreen").style.display = "none";
+            const resultDiv = document.getElementById("results");
+            resultDiv.innerHTML = "";
+            data.results.forEach(res => {
+                const card = document.createElement("div");
+                card.className = "card";
+                card.style.borderColor = res.color;
+                card.innerHTML = `
+                    <h4 style="color:${res.color}">Port ${res.port} - ${res.status}</h4>
+                    <p><strong>Purpose:</strong> ${res.description}</p>
+                    <p><strong>Threat:</strong> ${res.threat_name}</p>
+                    <p>${res.threat_description}</p>`;
+                resultDiv.appendChild(card);
+            });
+        });
+    }
 </script>
+
 </body>
 </html>
