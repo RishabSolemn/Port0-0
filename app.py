@@ -1,6 +1,13 @@
-from flask import Flask, request, render_template_string
+from flask import Flask, request, render_template_string, send_file, redirect, url_for
 import socket
 import os
+import datetime
+
+app = Flask(__name__)
+
+SAFE_PORTS = [20, 21, 22, 23, 25, 53, 80, 110, 143, 443, 3306]
+
+LOG_FILE = "search_logs.txt"
 
 html_template = """
 <!DOCTYPE html>
@@ -10,186 +17,162 @@ html_template = """
     <title>PSX – Port Scanner eXtreme</title>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #121212;
+            background: #121212;
             color: #f0f0f0;
+            font-family: 'Segoe UI', sans-serif;
             padding: 20px;
-            margin: 0;
-        }
-        h1 {
-            color: #00bfff;
-            text-align: center;
-        }
-        form {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        input[type=text], input[type=number] {
-            padding: 10px;
-            margin: 5px;
-            width: 200px;
-            border-radius: 5px;
-            border: none;
-        }
-        input[type=submit] {
-            padding: 10px 20px;
-            background-color: #00bfff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .loader-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background-color: rgba(0, 0, 0, 0.85);
-            z-index: 1000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
         }
         .rasengan-loader {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        .rasengan-circle {
             width: 100px;
             height: 100px;
-            border: 10px solid #00bfff;
-            border-top: 10px solid #1e90ff;
             border-radius: 50%;
+            border: 5px solid #00bfff;
             animation: spin 1s linear infinite;
+            box-shadow: 0 0 30px #00bfff;
         }
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        .results-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            justify-content: center;
-        }
+        input[type=text] { padding: 10px; width: 300px; }
+        input[type=submit] { padding: 10px 20px; }
         .port-box {
-            background-color: #1e1e1e;
-            padding: 15px;
+            background: #1e1e1e;
             border-radius: 8px;
-            width: 220px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
-            text-align: center;
+            padding: 10px;
+            margin: 5px;
+            display: inline-block;
+            min-width: 120px;
         }
-        .level-1 { border-left: 6px solid #00ff00; }
-        .level-2 { border-left: 6px solid #ffff00; }
-        .level-3 { border-left: 6px solid #ffa500; }
-        .level-4 { border-left: 6px solid #ff0000; }
-        .level-5 { border-left: 6px solid #000000; color: #ff4444; font-weight: bold; }
-        .legend {
-            margin: 20px auto;
-            max-width: 600px;
-            background-color: #1e1e1e;
-            padding: 20px;
-            border-radius: 8px;
-        }
+        .green { border-left: 5px solid #66ff66; }
+        .yellow { border-left: 5px solid #ffff66; }
+        .orange { border-left: 5px solid #ffcc66; }
+        .red { border-left: 5px solid #ff6666; }
+        .black { border-left: 5px solid #666666; }
     </style>
     <script>
         function showLoader() {
             document.getElementById('loader').style.display = 'flex';
-        }
-        window.onload = function() {
-            document.getElementById('loader').style.display = 'none';
+            document.getElementById('scan-form').submit();
         }
     </script>
 </head>
 <body>
-    <div id="loader" class="loader-overlay">
-        <div class="rasengan-loader"></div>
+    <div id="loader" class="rasengan-loader" style="display:none;">
+        <div class="rasengan-circle"></div>
+        <p style="margin-top:20px; color:white;">Naruto is charging the Rasengan...</p>
+        <audio autoplay loop>
+            <source src="https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg" type="audio/ogg">
+        </audio>
     </div>
-    <h1>PSX – Port Scanner eXtreme</h1>
+
+    <h1>🔍 PSX – Port Scanner eXtreme</h1>
+    {% if not permission %}
     <form method="post" onsubmit="showLoader()">
+        <p>⚠️ Do you have permission to scan the IP or domain you are entering?</p>
+        <button type="submit" name="permission" value="yes">Yes, I have permission</button>
+    </form>
+    {% else %}
+    <form id="scan-form" method="post" onsubmit="showLoader()">
         <input type="text" name="host" placeholder="Enter IP or hostname" required>
-        <input type="number" name="start" placeholder="Start Port" min="1" max="65535">
-        <input type="number" name="end" placeholder="End Port" min="1" max="65535">
         <input type="submit" value="Scan">
     </form>
-    <div class="legend">
-        <h3>Threat Level Guide:</h3>
-        <ul>
-            <li class="level-1">🟢 Level 1: <b>Static Breeze</b> — No real danger</li>
-            <li class="level-2">🟡 Level 2: <b>Phantom Echo</b> — Misconfigurations</li>
-            <li class="level-3">🟠 Level 3: <b>Crimson Pulse</b> — Suspicious services</li>
-            <li class="level-4">🔴 Level 4: <b>Zero Protocol</b> — Known vulnerabilities</li>
-            <li class="level-5">⚫ Level 5: <b>Blackout Eclipse</b> — Critical breach</li>
-        </ul>
-    </div>
-    {% if results is not none %}
-    <h2 style="text-align:center;">Results for {{ host }}</h2>
-    <div class="results-container">
-        {% for port, data in results.items() %}
-        <div class="port-box level-{{ data.level }}">
-            <strong>Port {{ port }}</strong><br>
-            Status: {{ data.status }}<br>
-            Threat: {{ data.threat }}
-        </div>
+    {% endif %}
+
+    {% if results %}
+        <h2>Results for {{ host }}</h2>
+        <div>
+        {% for port, info in results.items() %}
+            <div class="port-box {{ info.level_class }}">
+                <strong>Port {{ port }}</strong><br>
+                Status: {{ info.status }}<br>
+                Threat: {{ info.level }}<br>
+                Tagline: {{ info.tagline }}
+            </div>
         {% endfor %}
-    </div>
+        </div>
+        <br>
+        <a href="/download">📥 Download Scan Log</a>
     {% endif %}
 </body>
 </html>
 """
 
-app = Flask(__name__)
-
 THREAT_LEVELS = [
-    ("Open", 1, "Static Breeze"),
-    ("Open (No Auth)", 2, "Phantom Echo"),
-    ("Suspicious", 3, "Crimson Pulse"),
-    ("Vulnerable", 4, "Zero Protocol"),
-    ("Critical", 5, "Blackout Eclipse")
+    ("🟢 Level 1: Static Breeze", "green", "Barely a ripple in the network."),
+    ("🟡 Level 2: Phantom Echo", "yellow", "Something’s moving… just out of view."),
+    ("🟠 Level 3: Crimson Pulse", "orange", "The heartbeat of a lurking menace."),
+    ("🔴 Level 4: Zero Protocol", "red", "They’ve seen you. They’re responding."),
+    ("⚫ Level 5: Blackout Eclipse", "black", "The system falls silent… before it breaks.")
 ]
 
-def get_threat_level(port, is_open):
-    if not is_open:
-        return 1, "Static Breeze"
-    if port in [80, 110, 143]:
-        return 2, "Phantom Echo"
-    if port in [21, 22]:
-        return 3, "Crimson Pulse"
-    if port in [25, 3306]:
-        return 4, "Zero Protocol"
-    return 5, "Blackout Eclipse"
+def assess_threat(port, status):
+    if status != "Open":
+        return THREAT_LEVELS[0]
+    if port in [80, 110]:
+        return THREAT_LEVELS[1]
+    elif port in [21, 22, 23]:
+        return THREAT_LEVELS[2]
+    elif port in [25, 143, 3306]:
+        return THREAT_LEVELS[3]
+    elif port in [53]:
+        return THREAT_LEVELS[4]
+    return THREAT_LEVELS[1]
 
 @app.route("/", methods=["GET", "POST"])
 def index():
     results = None
     host = None
+    permission = False
+
     if request.method == "POST":
-        host = request.form["host"]
-        try:
-            socket.gethostbyname(host)
-        except socket.gaierror:
-            return render_template_string(html_template, results=None, host=f"Invalid hostname: {host}")
+        if "permission" in request.form:
+            permission = True
+        else:
+            permission = True
+            host = request.form.get("host")
+            results = {}
+            timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            with open(LOG_FILE, "a") as f:
+                f.write(f"[{timestamp}] Host scanned: {host}\n")
 
-        try:
-            start_port = int(request.form.get("start", 20))
-            end_port = int(request.form.get("end", 1024))
-        except ValueError:
-            start_port, end_port = 20, 1024
-
-        results = {}
-        for port in range(start_port, end_port + 1):
-            try:
-                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                    s.settimeout(0.5)
-                    result = s.connect_ex((host, port))
-                    is_open = (result == 0)
-                    level, threat = get_threat_level(port, is_open)
+            for port in SAFE_PORTS:
+                try:
+                    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                        s.settimeout(0.5)
+                        result = s.connect_ex((host, port))
+                        status = "Open" if result == 0 else "Closed"
+                        level, level_class, tagline = assess_threat(port, status)
+                        results[port] = {
+                            "status": status,
+                            "level": level,
+                            "level_class": level_class,
+                            "tagline": tagline
+                        }
+                except Exception as e:
                     results[port] = {
-                        "status": "Open" if is_open else "Closed",
-                        "level": level,
-                        "threat": threat
+                        "status": f"Error: {str(e)}",
+                        "level": "N/A",
+                        "level_class": "",
+                        "tagline": "Connection issue"
                     }
-            except Exception as e:
-                results[port] = {"status": f"Error: {str(e)}", "level": 1, "threat": "Static Breeze"}
-    return render_template_string(html_template, results=results, host=host)
+
+    return render_template_string(html_template, results=results, host=host, permission=permission)
+
+@app.route("/download")
+def download():
+    return send_file(LOG_FILE, as_attachment=True)
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
