@@ -3,255 +3,248 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>PSX – Port Scanner eXtreme</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <title>Port Scanner eXtreme - PSX</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
   <style>
     body {
       margin: 0;
-      background: linear-gradient(120deg, #0f0f0f, #1a1a1a);
-      font-family: 'Share Tech Mono', monospace;
-      color: #fff;
+      font-family: 'Orbitron', sans-serif;
+      background: #0f0f0f;
+      color: #e0e0e0;
       overflow-x: hidden;
     }
 
     header {
-      background: #111;
-      padding: 1.5rem;
-      text-align: center;
-      font-family: 'Orbitron', sans-serif;
-      font-size: 1.8rem;
-      color: #00f2ff;
-      box-shadow: 0 4px 15px rgba(0,255,255,0.2);
-    }
-
-    .container {
       padding: 2rem;
+      background: linear-gradient(145deg, #0f2027, #203a43, #2c5364);
+      color: #00ffe0;
+      text-align: center;
+      font-size: 2rem;
+      letter-spacing: 1px;
+      border-bottom: 2px solid #00ffe0;
     }
 
-    .input-group {
+    .section {
+      padding: 2rem 5%;
+    }
+
+    .section-title {
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
+      color: #00ffc6;
+      border-left: 5px solid #00ffc6;
+      padding-left: 0.8rem;
+    }
+
+    .glow-on-hover {
+      transition: 0.3s ease-in-out;
+    }
+
+    .glow-on-hover:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 0 20px #00ffe0;
+    }
+
+    .input-area {
       display: flex;
-      justify-content: center;
       gap: 1rem;
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
     }
 
-    .input-group input {
-      padding: 0.8rem;
-      font-size: 1.1rem;
-      background: #222;
-      border: 1px solid #0ff;
-      color: #0ff;
-      border-radius: 6px;
-    }
-
-    .input-group button {
-      background: #00f2ff;
+    input[type="text"] {
+      padding: 0.7rem;
+      width: 300px;
       border: none;
-      padding: 0.8rem 1.2rem;
-      font-size: 1.1rem;
-      color: #000;
-      cursor: pointer;
-      border-radius: 6px;
-      transition: background 0.3s;
+      border-radius: 5px;
+      background: #1c1c1c;
+      color: #fff;
+      outline: none;
     }
 
-    .input-group button:hover {
-      background: #00aaff;
+    button {
+      padding: 0.7rem 1.5rem;
+      background: #00ffc6;
+      border: none;
+      border-radius: 5px;
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
     }
 
     .result-box {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-      justify-content: center;
-    }
-
-    .port-box {
-      border-radius: 8px;
+      background: #1a1a1a;
+      margin: 1rem 0;
       padding: 1rem;
-      background: #1c1c1c;
-      border: 1px solid #555;
-      width: 300px;
-      transition: transform 0.2s ease;
+      border-radius: 8px;
+      border-left: 5px solid;
+      transition: transform 0.2s;
     }
 
-    .port-box:hover {
-      transform: scale(1.03);
+    .result-box:hover {
+      transform: scale(1.02);
     }
 
-    .loading-screen {
+    #loading-screen {
+      display: none;
       position: fixed;
       top: 0; left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.9);
-      z-index: 999;
-      display: flex;
-      align-items: center;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 9999;
       justify-content: center;
+      align-items: center;
       flex-direction: column;
-      display: none;
     }
 
-    .loading-clock {
+    .clock-loader {
       width: 80px;
       height: 80px;
-      border: 8px solid #0ff;
-      border-top: 8px solid #111;
+      border: 10px solid #00ffc6;
       border-radius: 50%;
-      animation: spin 1.2s linear infinite;
+      border-top-color: transparent;
+      animation: spin 1s linear infinite;
     }
 
     @keyframes spin {
-      0% { transform: rotate(0); }
-      100% { transform: rotate(360deg); }
+      to { transform: rotate(360deg); }
     }
 
-    .popup {
+    #permission-modal {
+      display: none;
       position: fixed;
       top: 0; left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(15, 15, 15, 0.95);
-      z-index: 1000;
-      display: none;
-      align-items: center;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 9998;
       justify-content: center;
-      color: #fff;
-      font-family: 'Orbitron', sans-serif;
+      align-items: center;
     }
 
-    .popup-content {
+    .modal-box {
+      background: #1a1a1a;
+      padding: 2rem;
+      border-radius: 8px;
+      max-width: 400px;
+      color: #fff;
+    }
+
+    .modal-box h3 {
+      margin-bottom: 1rem;
+      color: #ffe156;
+    }
+
+    .modal-box label {
+      display: block;
+      margin: 0.5rem 0;
+    }
+
+    .reference-box {
+      margin-bottom: 1rem;
+    }
+
+    footer {
       background: #111;
       padding: 2rem;
-      border-radius: 10px;
-      border: 2px solid #0ff;
-      max-width: 500px;
       text-align: center;
-      font-size: 1rem;
+      color: #999;
+      border-top: 1px solid #333;
     }
 
-    .popup-content input {
-      margin-top: 10px;
-    }
-
-    .popup-content button {
-      margin-top: 15px;
-      padding: 0.6rem 1rem;
-      background: #00f2ff;
-      color: #000;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    .section-divider {
-      border-bottom: 1px solid #00f2ff44;
-      margin: 2rem 0;
-    }
-
-    .reference {
-      padding: 1rem;
-      background: #0c0c0c;
-      border-left: 5px solid #00f2ff;
+    footer h3 {
+      color: #00ffc6;
+      margin-bottom: 0.5rem;
     }
   </style>
 </head>
 <body>
+  <header>
+    Port Scanner eXtreme - PSX
+  </header>
 
-  <header>PSX – Port Scanner eXtreme</header>
-
-  <div class="container">
-    <div class="input-group">
-      <input type="text" id="hostInput" placeholder="Enter IP or Domain">
-      <button onclick="showPopup()">Scan</button>
+  <section class="section">
+    <div class="section-title">🔍 Scanner</div>
+    <div class="input-area">
+      <input id="host-input" type="text" placeholder="Enter IP or domain..." />
+      <button class="glow-on-hover" onclick="showPermission()">Scan</button>
     </div>
+    <div id="scan-results"></div>
+  </section>
 
-    <div class="section-divider"></div>
+  <section class="section">
+    <div class="section-title">📊 Threat Reference</div>
+    {% for level, data in threat_levels.items() %}
+      <div class="reference-box" style="border-left: 5px solid {{ data[2] }}; padding-left: 1rem;">
+        <strong>{{ data[0] }}</strong><br/>
+        <span>{{ data[1] }}</span>
+      </div>
+    {% endfor %}
+  </section>
 
-    <div class="reference">
-      <h3>🔒 Threat Level Reference</h3>
-      <ul>
-        {% for level, (title, desc, color) in threat_levels.items() %}
-          <li style="color: {{ color }};"><strong>{{ title }}</strong>: {{ desc }}</li>
-        {% endfor %}
-      </ul>
-    </div>
+  <section class="section">
+    <div class="section-title">📞 Contact Us</div>
+    <p><strong>Email:</strong> rishabsolemn@gmail.com</p>
+    <p><strong>Phone:</strong> +91 77329 00007</p>
+    <p><strong>GitHub:</strong> Rishabsolemn</p>
+    <p><strong>LinkedIn:</strong> Rishab Ravikumar</p>
+  </section>
 
-    <div class="section-divider"></div>
-
-    <div id="results" class="result-box"></div>
+  <div id="loading-screen">
+    <div class="clock-loader"></div>
+    <p style="margin-top: 1rem;">Scanning ports...</p>
   </div>
 
-  <div class="popup" id="questionnaire">
-    <div class="popup-content">
+  <div id="permission-modal">
+    <div class="modal-box">
       <h3>Permission Required</h3>
-      <p>1. Why do you want to use this scanner?</p>
-      <input type="text" id="reason"><br>
-      <p>2. Are you 16 or older? <input type="checkbox" id="ageCheck"></p>
-      <p>3. Do you take full responsibility if you scan without permission? <input type="checkbox" id="responsibilityCheck"></p>
-      <button onclick="verifyPermission()">Yes, Proceed</button>
+      <label><input type="checkbox" id="age-check"> I am 16 or older</label>
+      <label><input type="checkbox" id="intent-check"> I understand the purpose is educational</label>
+      <label><input type="checkbox" id="consent-check"> I accept full responsibility for any unauthorized scans</label>
+      <button onclick="submitPermission()">Yes, I Accept</button>
     </div>
-  </div>
-
-  <div class="loading-screen" id="loading">
-    <div class="loading-clock"></div>
-    <p style="margin-top: 10px;">Scanning in progress...</p>
   </div>
 
   <script>
-    function showPopup() {
-      document.getElementById("questionnaire").style.display = "flex";
+    function showPermission() {
+      document.getElementById("permission-modal").style.display = "flex";
     }
 
-    function verifyPermission() {
-      const reason = document.getElementById("reason").value;
-      const isOldEnough = document.getElementById("ageCheck").checked;
-      const takesResponsibility = document.getElementById("responsibilityCheck").checked;
-
-      if (!reason || !isOldEnough || !takesResponsibility) {
-        alert("Please fill all fields correctly to proceed.");
-        return;
+    function submitPermission() {
+      const age = document.getElementById("age-check").checked;
+      const intent = document.getElementById("intent-check").checked;
+      const consent = document.getElementById("consent-check").checked;
+      if (age && intent && consent) {
+        document.getElementById("permission-modal").style.display = "none";
+        startScan();
+      } else {
+        alert("Please check all boxes to proceed.");
       }
-
-      document.getElementById("questionnaire").style.display = "none";
-      scanHost();
     }
 
-    async function scanHost() {
-      const host = document.getElementById("hostInput").value;
-      if (!host) return alert("Please enter a host");
+    async function startScan() {
+      const host = document.getElementById("host-input").value;
+      if (!host) return alert("Please enter a domain or IP");
+      document.getElementById("loading-screen").style.display = "flex";
 
-      document.getElementById("loading").style.display = "flex";
-      const response = await fetch("/scan", {
+      const res = await fetch("/scan", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ host })
       });
+      const data = await res.json();
+      document.getElementById("loading-screen").style.display = "none";
 
-      const data = await response.json();
-      const resultsDiv = document.getElementById("results");
-      resultsDiv.innerHTML = "";
-
-      if (data.results) {
-        data.results.forEach(r => {
-          const box = document.createElement("div");
-          box.className = "port-box";
-          box.innerHTML = `
-            <h4 style="color:${r.color};">${r.threat_name}</h4>
-            <p><strong>Port:</strong> ${r.port}</p>
-            <p><strong>Status:</strong> ${r.status}</p>
-            <p><strong>Service:</strong> ${r.description}</p>
-            <p style="font-size: 0.9em;">${r.threat_description}</p>
-          `;
-          resultsDiv.appendChild(box);
-        });
-      } else {
-        resultsDiv.innerHTML = `<p style="color:red;">${data.error}</p>`;
-      }
-
-      document.getElementById("loading").style.display = "none";
+      const resultsDiv = document.getElementById("scan-results");
+      resultsDiv.innerHTML = `<h3>Scan Results for ${data.host} (${data.ip})</h3>`;
+      data.results.forEach(r => {
+        resultsDiv.innerHTML += `
+          <div class="result-box glow-on-hover" style="border-color: ${r.color}">
+            <strong>Port:</strong> ${r.port} - ${r.description}<br/>
+            <strong>Status:</strong> ${r.status}<br/>
+            <strong>Threat Level:</strong> ${r.threat_name} - ${r.threat_description}
+          </div>`;
+      });
     }
   </script>
 </body>
