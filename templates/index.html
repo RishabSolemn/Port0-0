@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PSX – Port Scanner eXtreme</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background-color: #111;
+      color: #fff;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    .rasengan-loader {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      border: 5px solid #00ffff;
+      animation: spin 0.8s linear infinite;
+      position: absolute;
+      top: 45%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1001;
+    }
+    #overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background-color: rgba(0, 0, 0, 0.8);
+      display: none;
+      z-index: 1000;
+    }
+    @keyframes spin {
+      0% { transform: translate(-50%, -50%) rotate(0deg); }
+      100% { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+    .result-box {
+      border-radius: 10px;
+      padding: 15px;
+      margin: 10px;
+      flex: 1 0 30%;
+    }
+    .popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #222;
+      padding: 30px;
+      border-radius: 15px;
+      z-index: 1002;
+      display: none;
+      box-shadow: 0 0 20px #00ffff;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container mt-5">
+  <h1 class="text-info fw-bold">PSX – Port Scanner eXtreme</h1>
+  <form id="scan-form" class="my-4">
+    <div class="input-group">
+      <input type="text" id="host" class="form-control" placeholder="Enter IP or Domain" required />
+      <button class="btn btn-outline-info" type="submit">Scan</button>
+    </div>
+  </form>
+
+  <div id="results" class="d-flex flex-wrap"></div>
+
+  <div class="mt-5">
+    <h4>🔒 Threat Level Reference</h4>
+    <div class="row">
+      {% for level, details in threat_levels.items() %}
+        <div class="col-md-4 my-2">
+          <div class="p-3 border rounded" style="background-color: {{ details[2] }}; color: #000;">
+            <strong>{{ details[0] }}</strong><br>
+            <em>{{ details[1] }}</em>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="mt-4">
+    <a href="/download-log" class="btn btn-sm btn-outline-light">Download Scan Log</a>
+  </div>
+</div>
+
+<div id="overlay">
+  <div class="rasengan-loader"></div>
+</div>
+
+<div class="popup" id="permission-popup">
+  <p>⚠️ Have you received permission to scan this IP/domain?</p>
+  <button id="allow-btn" class="btn btn-success me-2">Yes</button>
+  <button id="deny-btn" class="btn btn-danger">No</button>
+</div>
+
+<script>
+  const form = document.getElementById("scan-form");
+  const hostInput = document.getElementById("host");
+  const resultsDiv = document.getElementById("results");
+  const overlay = document.getElementById("overlay");
+  const popup = document.getElementById("permission-popup");
+
+  let pendingHost = "";
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    pendingHost = hostInput.value.trim();
+    if (pendingHost) {
+      popup.style.display = "block";
+      overlay.style.display = "block";
+    }
+  });
+
+  document.getElementById("allow-btn").onclick = () => {
+    popup.style.display = "none";
+    fetch("/scan", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ host: pendingHost }),
+    })
+    .then(res => res.json())
+    .then(data => {
+      resultsDiv.innerHTML = "";
+      data.results.forEach(res => {
+        const box = document.createElement("div");
+        box.className = "result-box";
+        box.style.background = getThreatColor(res.threat_level);
+        box.innerHTML = `
+          <h5>Port ${res.port} (${res.status})</h5>
+          <p><strong>${res.description}</strong></p>
+          <p>${res.threat_name}</p>
+        `;
+        resultsDiv.appendChild(box);
+      });
+      overlay.style.display = "none";
+    });
+  };
+
+  document.getElementById("deny-btn").onclick = () => {
+    popup.style.display = "none";
+    overlay.style.display = "none";
+    alert("Permission denied. Scan cancelled.");
+  };
+
+  function getThreatColor(level) {
+    switch (level) {
+      case 1: return "#8fff8f";
+      case 2: return "#ffff99";
+      case 3: return "#ffbb66";
+      case 4: return "#ff6666";
+      case 5: return "#333333";
+      default: return "#ccc";
+    }
+  }
+</script>
+
+</body>
+</html>
