@@ -1,164 +1,212 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PSX – Port Scanner eXtreme</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
-    <style>
-        body {
-            background-color: #121212;
-            color: #eee;
-            font-family: 'Segoe UI', sans-serif;
-            scroll-behavior: smooth;
-        }
-        .premium-section {
-            background-color: #1e1e1e;
-            border-radius: 15px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-        }
-        .result-box {
-            background-color: #222;
-            border: 1px solid #333;
-            border-radius: 10px;
-            padding: 1rem;
-            margin: 1rem;
-        }
-        #loading-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            z-index: 9999;
-            justify-content: center;
-            align-items: center;
-        }
-        #rasengan-loader {
-            width: 150px; height: 150px;
-            border: 8px solid #4fc3f7;
-            border-top: 8px solid transparent;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        #permission-modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0;
-            width: 100vw; height: 100vh;
-            background: rgba(0, 0, 0, 0.75);
-            z-index: 9998;
-            justify-content: center;
-            align-items: center;
-        }
-        #permission-box {
-            background: #222;
-            border-radius: 15px;
-            padding: 2rem;
-            color: #fff;
-            max-width: 400px;
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
-            text-align: center;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PSX – Port Scanner eXtreme</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #121212;
+      color: #e0e0e0;
+      scroll-behavior: smooth;
+    }
+    header {
+      background: linear-gradient(to right, #1f1f1f, #292929);
+      padding: 1.5rem;
+      text-align: center;
+      font-size: 2rem;
+      color: #4fd1c5;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    }
+    .section {
+      padding: 2rem;
+      max-width: 900px;
+      margin: auto;
+    }
+    #scanner, #threat-chart, #results {
+      background: #1d1d1d;
+      padding: 1.5rem;
+      border-radius: 1rem;
+      box-shadow: 0 0 20px rgba(0,0,0,0.4);
+      margin-bottom: 2rem;
+    }
+    input, button {
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      border: none;
+      outline: none;
+      font-size: 1rem;
+    }
+    input {
+      width: 70%;
+    }
+    button {
+      background-color: #4fd1c5;
+      color: black;
+      cursor: pointer;
+    }
+    .popup {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.8);
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+    }
+    .popup-content {
+      background: #222;
+      padding: 2rem;
+      border-radius: 1rem;
+      text-align: center;
+      color: #fff;
+    }
+    .popup-content button {
+      margin: 1rem;
+      padding: 0.75rem 1.5rem;
+    }
+    .result-box {
+      background: #2b2b2b;
+      margin: 0.5rem 0;
+      padding: 1rem;
+      border-left: 6px solid;
+      border-radius: 0.5rem;
+      display: flex;
+      justify-content: space-between;
+    }
+    .fade-in {
+      animation: fadeIn 0.8s ease forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    #loading {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      color: #4fd1c5;
+      font-size: 2rem;
+      flex-direction: column;
+    }
+    #loading::after {
+      content: "\f2f2";
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+      font-size: 4rem;
+      animation: pulse 1s infinite alternate;
+    }
+    @keyframes pulse {
+      from { transform: scale(0.9); }
+      to { transform: scale(1.1); }
+    }
+  </style>
 </head>
 <body>
-    <header class="text-center p-4">
-        <h1 class="display-5 fw-bold text-light">⚡ PSX – Port Scanner eXtreme ⚡</h1>
-        <p class="text-muted">Scan networks with style and precision – powered by anime aesthetics.</p>
-    </header>
+  <div id="loading">Scanning</div>
 
-    <main class="container">
-        <section class="premium-section">
-            <h3>Target Host/IP</h3>
-            <input type="text" id="host" class="form-control mb-3" placeholder="Enter domain or IP...">
-            <button class="btn btn-primary" onclick="confirmPermission()">Start Scan</button>
-        </section>
+  <header>
+    PSX – Port Scanner eXtreme
+  </header>
 
-        <section id="reference" class="premium-section">
-            <h4>Threat Level Reference</h4>
-            <div class="row">
-                {% for level, info in threat_levels.items() %}
-                <div class="col-md-4 result-box" style="border-left: 5px solid {{ info[2] }}">
-                    <h5>{{ info[0] }}</h5>
-                    <p>{{ info[1] }}</p>
-                </div>
-                {% endfor %}
+  <div class="section fade-in" id="scanner">
+    <h2>Scan a Host</h2>
+    <input id="hostInput" placeholder="Enter domain or IP...">
+    <button onclick="confirmPermission()">Scan</button>
+  </div>
+
+  <div class="popup" id="permissionPopup">
+    <div class="popup-content">
+      <p>Have you received permission from the owner of this domain/IP to scan their ports?</p>
+      <button onclick="proceedScan()">Yes</button>
+      <button onclick="closePopup()">No</button>
+    </div>
+  </div>
+
+  <div class="section fade-in" id="threat-chart">
+    <h3>Threat Level Reference</h3>
+    <canvas id="chart"></canvas>
+  </div>
+
+  <div class="section fade-in" id="results">
+    <h3>Scan Results</h3>
+    <div id="resultsContainer"></div>
+  </div>
+
+  <script>
+    const chartData = {
+      labels: ["Level 1", "Level 2", "Level 3", "Level 4", "Level 5"],
+      datasets: [{
+        label: "Threat Level Reference",
+        data: [1, 2, 3, 4, 5],
+        backgroundColor: ["#7BAFAF", "#BBA14F", "#D47A5D", "#9E3B3B", "#1E1E1E"]
+      }]
+    };
+
+    new Chart(document.getElementById("chart"), {
+      type: 'bar',
+      data: chartData,
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { ticks: { stepSize: 1, precision: 0 }, beginAtZero: true }
+        }
+      }
+    });
+
+    let currentHost = "";
+
+    function confirmPermission() {
+      currentHost = document.getElementById("hostInput").value;
+      if (!currentHost.trim()) return alert("Please enter a valid domain or IP.");
+      document.getElementById("permissionPopup").style.display = "flex";
+    }
+
+    function closePopup() {
+      document.getElementById("permissionPopup").style.display = "none";
+    }
+
+    function proceedScan() {
+      document.getElementById("permissionPopup").style.display = "none";
+      document.getElementById("loading").style.display = "flex";
+
+      fetch('/scan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ host: currentHost })
+      })
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("loading").style.display = "none";
+        if (data.error) return alert(data.error);
+        const container = document.getElementById("resultsContainer");
+        container.innerHTML = "";
+        data.results.forEach(result => {
+          const box = document.createElement("div");
+          box.className = "result-box";
+          box.style.borderLeftColor = result.color;
+          box.innerHTML = `
+            <div>
+              <strong>Port ${result.port}</strong> – ${result.description}<br>
+              <small>${result.threat_name}: ${result.threat_description}</small>
             </div>
-        </section>
-
-        <section id="results" class="premium-section">
-            <h3>Scan Results</h3>
-            <div id="output" class="row"></div>
-        </section>
-    </main>
-
-    <!-- Loading overlay -->
-    <div id="loading-overlay" class="d-flex">
-        <div>
-            <div id="rasengan-loader"></div>
-            <p class="text-light mt-3 text-center">Naruto is charging Rasengan...</p>
-        </div>
-    </div>
-
-    <!-- Permission Modal -->
-    <div id="permission-modal" class="d-flex">
-        <div id="permission-box">
-            <h4>Permission Required</h4>
-            <p>Do you have permission to scan this domain or IP?</p>
-            <button class="btn btn-success" onclick="startScan()">Yes, proceed</button>
-            <button class="btn btn-danger" onclick="denyPermission()">No</button>
-        </div>
-    </div>
-
-    <script>
-        function confirmPermission() {
-            const host = document.getElementById("host").value;
-            if (!host) return alert("Please enter a host to scan.");
-            document.getElementById("permission-modal").style.display = "flex";
-        }
-
-        function denyPermission() {
-            window.location.href = "https://www.google.com";
-        }
-
-        function startScan() {
-            const host = document.getElementById("host").value;
-            document.getElementById("permission-modal").style.display = "none";
-            document.getElementById("loading-overlay").style.display = "flex";
-
-            fetch("/scan", {
-                method: "POST",
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ host })
-            })
-            .then(res => res.json())
-            .then(data => {
-                const output = document.getElementById("output");
-                output.innerHTML = "";
-                data.results.forEach(port => {
-                    const card = `
-                        <div class="col-md-4">
-                            <div class="result-box" style="border-left: 5px solid ${port.color}">
-                                <h5>Port ${port.port} - ${port.description}</h5>
-                                <p>Status: ${port.status}</p>
-                                <p>Threat: <strong>${port.threat_name}</strong></p>
-                                <p>${port.threat_description}</p>
-                            </div>
-                        </div>
-                    `;
-                    output.innerHTML += card;
-                });
-                document.getElementById("loading-overlay").style.display = "none";
-            });
-        }
-    </script>
+            <div>${result.status}</div>
+          `;
+          container.appendChild(box);
+        });
+      });
+    }
+  </script>
 </body>
 </html>
