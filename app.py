@@ -25,12 +25,13 @@ PORT_INFO = {
 }
 
 THREAT_LEVELS = {
-    1: ("🟢 Static Breeze", "Harmless background noise, idle services", "Soft green"),
-    2: ("🟡 Phantom Echo", "Unsecured services, misconfigured ports", "Golden yellow"),
-    3: ("🟠 Crimson Pulse", "Vulnerable services, suspicious patterns", "Bright orange"),
-    4: ("🔴 Zero Protocol", "Known exploits, active malware", "Red"),
-    5: ("⚫ Blackout Eclipse", "Critical breach, APTs, rootkits", "Black")
+    1: ("🟢 Static Breeze", "Harmless background noise, idle services", "#7BAFAF"),   # Soft muted teal
+    2: ("🟡 Phantom Echo", "Unsecured services, misconfigured ports", "#BBA14F"),     # Elegant muted gold
+    3: ("🟠 Crimson Pulse", "Vulnerable services, suspicious patterns", "#D47A5D"),   # Muted coral-orange
+    4: ("🔴 Zero Protocol", "Known exploits, active malware", "#9E3B3B"),             # Dark blood red
+    5: ("⚫ Blackout Eclipse", "Critical breach, APTs, rootkits", "#1E1E1E")          # Deep graphite black
 }
+
 
 SCAN_LOG = []
 
