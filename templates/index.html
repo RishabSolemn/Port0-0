@@ -1,140 +1,164 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>PSX – Port Scanner eXtreme</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    body {
-      background-color: #1c1c2b;
-      color: #e0e0e0;
-      font-family: 'Segoe UI', sans-serif;
-    }
-
-    .header {
-      background: linear-gradient(to right, #3b3f58, #232636);
-      padding: 2rem;
-      text-align: center;
-      border-bottom: 2px solid #5b5e6e;
-    }
-
-    .header h1 {
-      font-size: 3rem;
-      color: #ffd369;
-      font-weight: bold;
-    }
-
-    .section {
-      padding: 2rem;
-      border-bottom: 1px solid #444;
-    }
-
-    .reference-card {
-      background-color: #2e2f3f;
-      padding: 1rem;
-      margin-bottom: 1rem;
-      border-left: 6px solid;
-      border-radius: 6px;
-    }
-
-    .scan-result {
-      background-color: #2b2c3c;
-      padding: 1rem;
-      margin: 0.5rem;
-      border-radius: 6px;
-      flex: 1 1 200px;
-    }
-
-    .results-container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-
-    .btn-scan {
-      background-color: #ffd369;
-      color: #1c1c2b;
-      font-weight: bold;
-    }
-
-    .btn-scan:hover {
-      background-color: #e0c75a;
-    }
-
-    .muted {
-      color: #aaa;
-      font-size: 0.9rem;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PSX – Port Scanner eXtreme</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #121212;
+            color: #eee;
+            font-family: 'Segoe UI', sans-serif;
+            scroll-behavior: smooth;
+        }
+        .premium-section {
+            background-color: #1e1e1e;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+        .result-box {
+            background-color: #222;
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 1rem;
+            margin: 1rem;
+        }
+        #loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+        #rasengan-loader {
+            width: 150px; height: 150px;
+            border: 8px solid #4fc3f7;
+            border-top: 8px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        #permission-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.75);
+            z-index: 9998;
+            justify-content: center;
+            align-items: center;
+        }
+        #permission-box {
+            background: #222;
+            border-radius: 15px;
+            padding: 2rem;
+            color: #fff;
+            max-width: 400px;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
+    <header class="text-center p-4">
+        <h1 class="display-5 fw-bold text-light">⚡ PSX – Port Scanner eXtreme ⚡</h1>
+        <p class="text-muted">Scan networks with style and precision – powered by anime aesthetics.</p>
+    </header>
 
-  <div class="header">
-    <h1>PSX – Port Scanner eXtreme</h1>
-    <p class="muted">Analyze open ports with anime-inspired threat levels!</p>
-  </div>
+    <main class="container">
+        <section class="premium-section">
+            <h3>Target Host/IP</h3>
+            <input type="text" id="host" class="form-control mb-3" placeholder="Enter domain or IP...">
+            <button class="btn btn-primary" onclick="confirmPermission()">Start Scan</button>
+        </section>
 
-  <div class="section">
-    <h3>🔍 Enter IP or Domain</h3>
-    <form id="scanForm" class="d-flex flex-column flex-sm-row gap-2">
-      <input type="text" id="hostInput" class="form-control" placeholder="example.com or 192.168.0.1" required />
-      <button type="submit" class="btn btn-scan">Scan</button>
-    </form>
-  </div>
+        <section id="reference" class="premium-section">
+            <h4>Threat Level Reference</h4>
+            <div class="row">
+                {% for level, info in threat_levels.items() %}
+                <div class="col-md-4 result-box" style="border-left: 5px solid {{ info[2] }}">
+                    <h5>{{ info[0] }}</h5>
+                    <p>{{ info[1] }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
 
-  <div class="section">
-    <h3>📊 Threat Level Reference</h3>
-    {% for level, (name, description, color) in threat_levels.items() %}
-    <div class="reference-card" style="border-color: {{ color }};">
-      <strong style="color: {{ color }};">{{ name }}</strong>
-      <p class="muted">{{ description }}</p>
+        <section id="results" class="premium-section">
+            <h3>Scan Results</h3>
+            <div id="output" class="row"></div>
+        </section>
+    </main>
+
+    <!-- Loading overlay -->
+    <div id="loading-overlay" class="d-flex">
+        <div>
+            <div id="rasengan-loader"></div>
+            <p class="text-light mt-3 text-center">Naruto is charging Rasengan...</p>
+        </div>
     </div>
-    {% endfor %}
-  </div>
 
-  <div class="section">
-    <h3>📦 Scan Results</h3>
-    <div id="results" class="results-container">
-      <!-- Results will be injected here -->
+    <!-- Permission Modal -->
+    <div id="permission-modal" class="d-flex">
+        <div id="permission-box">
+            <h4>Permission Required</h4>
+            <p>Do you have permission to scan this domain or IP?</p>
+            <button class="btn btn-success" onclick="startScan()">Yes, proceed</button>
+            <button class="btn btn-danger" onclick="denyPermission()">No</button>
+        </div>
     </div>
-  </div>
 
-  <script>
-    document.getElementById('scanForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      const host = document.getElementById('hostInput').value;
+    <script>
+        function confirmPermission() {
+            const host = document.getElementById("host").value;
+            if (!host) return alert("Please enter a host to scan.");
+            document.getElementById("permission-modal").style.display = "flex";
+        }
 
-      const permission = confirm(`Are you authorized to scan ${host}?`);
-      if (!permission) return;
+        function denyPermission() {
+            window.location.href = "https://www.google.com";
+        }
 
-      const response = await fetch("/scan", {
-        method: "POST",
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ host })
-      });
+        function startScan() {
+            const host = document.getElementById("host").value;
+            document.getElementById("permission-modal").style.display = "none";
+            document.getElementById("loading-overlay").style.display = "flex";
 
-      const data = await response.json();
-      const container = document.getElementById("results");
-      container.innerHTML = "";
-
-      if (data.results) {
-        data.results.forEach(r => {
-          const div = document.createElement("div");
-          div.className = "scan-result";
-          div.style.borderLeft = `4px solid ${r.color}`;
-          div.innerHTML = `
-            <strong>Port ${r.port}</strong> - ${r.description}<br/>
-            <span>Status:</span> ${r.status}<br/>
-            <span style="color: ${r.color}; font-weight: bold;">${r.threat_name}</span>
-            <div class="muted">${r.threat_description}</div>
-          `;
-          container.appendChild(div);
-        });
-      } else {
-        container.innerHTML = `<p>Error: ${data.error}</p>`;
-      }
-    });
-  </script>
+            fetch("/scan", {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ host })
+            })
+            .then(res => res.json())
+            .then(data => {
+                const output = document.getElementById("output");
+                output.innerHTML = "";
+                data.results.forEach(port => {
+                    const card = `
+                        <div class="col-md-4">
+                            <div class="result-box" style="border-left: 5px solid ${port.color}">
+                                <h5>Port ${port.port} - ${port.description}</h5>
+                                <p>Status: ${port.status}</p>
+                                <p>Threat: <strong>${port.threat_name}</strong></p>
+                                <p>${port.threat_description}</p>
+                            </div>
+                        </div>
+                    `;
+                    output.innerHTML += card;
+                });
+                document.getElementById("loading-overlay").style.display = "none";
+            });
+        }
+    </script>
 </body>
 </html>
