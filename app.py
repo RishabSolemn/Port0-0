@@ -24,14 +24,14 @@ PORT_INFO = {
     8080: ("Alternative Web Traffic", 2)
 }
 
+# Updated with premium, muted color tones
 THREAT_LEVELS = {
-    1: ("🟢 Static Breeze", "Harmless background noise, idle services", "#7BAFAF"),   # Soft muted teal
-    2: ("🟡 Phantom Echo", "Unsecured services, misconfigured ports", "#BBA14F"),     # Elegant muted gold
-    3: ("🟠 Crimson Pulse", "Vulnerable services, suspicious patterns", "#D47A5D"),   # Muted coral-orange
-    4: ("🔴 Zero Protocol", "Known exploits, active malware", "#9E3B3B"),             # Dark blood red
-    5: ("⚫ Blackout Eclipse", "Critical breach, APTs, rootkits", "#1E1E1E")          # Deep graphite black
+    1: ("🟢 Static Breeze", "Harmless background noise, idle services", "#7BAFAF"),
+    2: ("🟡 Phantom Echo", "Unsecured services, misconfigured ports", "#BBA14F"),
+    3: ("🟠 Crimson Pulse", "Vulnerable services, suspicious patterns", "#D47A5D"),
+    4: ("🔴 Zero Protocol", "Known exploits, active malware", "#9E3B3B"),
+    5: ("⚫ Blackout Eclipse", "Critical breach, APTs, rootkits", "#1E1E1E")
 }
-
 
 SCAN_LOG = []
 
@@ -64,7 +64,9 @@ def scan():
                     "status": status,
                     "description": desc,
                     "threat_level": level,
-                    "threat_name": THREAT_LEVELS[level][0]
+                    "threat_name": THREAT_LEVELS[level][0],
+                    "threat_description": THREAT_LEVELS[level][1],
+                    "color": THREAT_LEVELS[level][2]
                 })
         except Exception as e:
             results.append({
@@ -72,7 +74,9 @@ def scan():
                 "status": f"Error: {str(e)}",
                 "description": desc,
                 "threat_level": level,
-                "threat_name": THREAT_LEVELS[level][0]
+                "threat_name": THREAT_LEVELS[level][0],
+                "threat_description": THREAT_LEVELS[level][1],
+                "color": THREAT_LEVELS[level][2]
             })
 
     SCAN_LOG.append({
