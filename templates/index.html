@@ -4,148 +4,254 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>PSX – Port Scanner eXtreme</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <style>
     body {
-      background: linear-gradient(135deg, #0d0d0d, #1f1f1f);
-      color: #f0f0f0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      background: linear-gradient(120deg, #0f0f0f, #1a1a1a);
+      font-family: 'Share Tech Mono', monospace;
+      color: #fff;
+      overflow-x: hidden;
     }
+
     header {
-      background: rgba(255, 255, 255, 0.02);
-      padding: 1rem;
-      border-bottom: 2px solid #D4AF37;
-    }
-    header h1 {
-      color: #D4AF37;
-      text-shadow: 0 0 15px #D4AF3799;
-    }
-    .partition {
-      margin-top: 2rem;
+      background: #111;
       padding: 1.5rem;
-      border-radius: 10px;
+      text-align: center;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.8rem;
+      color: #00f2ff;
+      box-shadow: 0 4px 15px rgba(0,255,255,0.2);
     }
-    .neon-box {
-      border: 1px solid #D4AF37;
-      box-shadow: 0 0 20px #D4AF3766;
-      border-radius: 10px;
+
+    .container {
+      padding: 2rem;
+    }
+
+    .input-group {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .input-group input {
+      padding: 0.8rem;
+      font-size: 1.1rem;
+      background: #222;
+      border: 1px solid #0ff;
+      color: #0ff;
+      border-radius: 6px;
+    }
+
+    .input-group button {
+      background: #00f2ff;
+      border: none;
+      padding: 0.8rem 1.2rem;
+      font-size: 1.1rem;
+      color: #000;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.3s;
+    }
+
+    .input-group button:hover {
+      background: #00aaff;
+    }
+
+    .result-box {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+    }
+
+    .port-box {
+      border-radius: 8px;
       padding: 1rem;
+      background: #1c1c1c;
+      border: 1px solid #555;
+      width: 300px;
+      transition: transform 0.2s ease;
     }
-    .scan-btn {
-      background: #D4AF37;
+
+    .port-box:hover {
+      transform: scale(1.03);
+    }
+
+    .loading-screen {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      z-index: 999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      display: none;
+    }
+
+    .loading-clock {
+      width: 80px;
+      height: 80px;
+      border: 8px solid #0ff;
+      border-top: 8px solid #111;
+      border-radius: 50%;
+      animation: spin 1.2s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .popup {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(15, 15, 15, 0.95);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    .popup-content {
+      background: #111;
+      padding: 2rem;
+      border-radius: 10px;
+      border: 2px solid #0ff;
+      max-width: 500px;
+      text-align: center;
+      font-size: 1rem;
+    }
+
+    .popup-content input {
+      margin-top: 10px;
+    }
+
+    .popup-content button {
+      margin-top: 15px;
+      padding: 0.6rem 1rem;
+      background: #00f2ff;
       color: #000;
       border: none;
-      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
     }
-    .scan-btn:hover {
-      background: #000;
-      color: #D4AF37;
-      border: 1px solid #D4AF37;
+
+    .section-divider {
+      border-bottom: 1px solid #00f2ff44;
+      margin: 2rem 0;
     }
-    .port-card {
-      background: rgba(255, 255, 255, 0.08);
+
+    .reference {
       padding: 1rem;
-      border-radius: 8px;
-      margin: 0.5rem 0;
-    }
-    .ref-card {
-      background: rgba(255, 255, 255, 0.05);
-      border-left: 4px solid #D4AF37;
-      padding: 1rem;
-      margin: 0.5rem 0;
-    }
-    .modal-content {
-      background-color: #1a1a1a;
-      border: 1px solid #D4AF37;
-      color: #fff;
+      background: #0c0c0c;
+      border-left: 5px solid #00f2ff;
     }
   </style>
 </head>
 <body>
-  <header class="text-center">
-    <h1>🛡️ PSX – Port Scanner eXtreme</h1>
-  </header>
 
-  <main class="container">
-    <!-- Search -->
-    <div class="partition neon-box">
-      <h4>Enter a domain or IP to scan:</h4>
-      <div class="input-group">
-        <input type="text" id="hostInput" class="form-control" placeholder="e.g. 192.168.1.1 or example.com"/>
-        <button class="btn scan-btn" onclick="showPermission()">Scan</button>
-      </div>
+  <header>PSX – Port Scanner eXtreme</header>
+
+  <div class="container">
+    <div class="input-group">
+      <input type="text" id="hostInput" placeholder="Enter IP or Domain">
+      <button onclick="showPopup()">Scan</button>
     </div>
 
-    <!-- Default Threat Levels Reference -->
-    <div class="partition">
-      <h4>⚠️ Default Threat Levels</h4>
-      <div id="threatLevels">
-        {% for level, (name, desc, color) in threat_levels.items() %}
-          <div class="ref-card" style="border-left-color: {{ color }}">
-            <h5 style="color: {{ color }}">{{ name }}</h5>
-            <p>{{ desc }}</p>
-          </div>
+    <div class="section-divider"></div>
+
+    <div class="reference">
+      <h3>🔒 Threat Level Reference</h3>
+      <ul>
+        {% for level, (title, desc, color) in threat_levels.items() %}
+          <li style="color: {{ color }};"><strong>{{ title }}</strong>: {{ desc }}</li>
         {% endfor %}
-      </div>
+      </ul>
     </div>
 
-    <!-- Results Section -->
-    <div class="partition neon-box" id="resultContainer" style="display:none;">
-      <h4>🔍 Scan Results for <span id="scanTarget"></span></h4>
-      <div id="results"></div>
-      <a href="/download-log" class="btn btn-outline-light mt-3">📥 Download Log</a>
-    </div>
-  </main>
+    <div class="section-divider"></div>
 
-  <!-- Modal for Permission -->
-  <div class="modal fade" id="permissionModal" tabindex="-1" aria-labelledby="permissionModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">⚠️ Permission Required</h5>
-        </div>
-        <div class="modal-body">
-          Do you have permission to scan the entered domain or IP?
-        </div>
-        <div class="modal-footer">
-          <button class="btn btn-secondary" data-bs-dismiss="modal">No</button>
-          <button class="btn btn-success" onclick="startScan()">Yes</button>
-        </div>
-      </div>
+    <div id="results" class="result-box"></div>
+  </div>
+
+  <div class="popup" id="questionnaire">
+    <div class="popup-content">
+      <h3>Permission Required</h3>
+      <p>1. Why do you want to use this scanner?</p>
+      <input type="text" id="reason"><br>
+      <p>2. Are you 16 or older? <input type="checkbox" id="ageCheck"></p>
+      <p>3. Do you take full responsibility if you scan without permission? <input type="checkbox" id="responsibilityCheck"></p>
+      <button onclick="verifyPermission()">Yes, Proceed</button>
     </div>
   </div>
 
-  <!-- Bootstrap & Script -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <div class="loading-screen" id="loading">
+    <div class="loading-clock"></div>
+    <p style="margin-top: 10px;">Scanning in progress...</p>
+  </div>
+
   <script>
-    function showPermission() {
-      const modal = new bootstrap.Modal(document.getElementById('permissionModal'));
-      modal.show();
+    function showPopup() {
+      document.getElementById("questionnaire").style.display = "flex";
     }
 
-    function startScan() {
-      const host = document.getElementById('hostInput').value;
-      if (!host) return alert("Please enter a domain or IP.");
-      fetch("/scan", {
+    function verifyPermission() {
+      const reason = document.getElementById("reason").value;
+      const isOldEnough = document.getElementById("ageCheck").checked;
+      const takesResponsibility = document.getElementById("responsibilityCheck").checked;
+
+      if (!reason || !isOldEnough || !takesResponsibility) {
+        alert("Please fill all fields correctly to proceed.");
+        return;
+      }
+
+      document.getElementById("questionnaire").style.display = "none";
+      scanHost();
+    }
+
+    async function scanHost() {
+      const host = document.getElementById("hostInput").value;
+      if (!host) return alert("Please enter a host");
+
+      document.getElementById("loading").style.display = "flex";
+      const response = await fetch("/scan", {
         method: "POST",
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ host: host })
-      })
-      .then(res => res.json())
-      .then(data => {
-        document.getElementById("resultContainer").style.display = "block";
-        document.getElementById("scanTarget").innerText = `${data.host} (${data.ip})`;
-        const resultsDiv = document.getElementById("results");
-        resultsDiv.innerHTML = "";
-        data.results.forEach(r => {
-          resultsDiv.innerHTML += `
-            <div class="port-card" style="border-left: 5px solid ${r.color}">
-              <strong>Port ${r.port}:</strong> ${r.status} <br/>
-              <em>${r.description}</em> <br/>
-              <span style="color: ${r.color}">${r.threat_name}</span> – ${r.threat_description}
-            </div>`;
-        });
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ host })
       });
+
+      const data = await response.json();
+      const resultsDiv = document.getElementById("results");
+      resultsDiv.innerHTML = "";
+
+      if (data.results) {
+        data.results.forEach(r => {
+          const box = document.createElement("div");
+          box.className = "port-box";
+          box.innerHTML = `
+            <h4 style="color:${r.color};">${r.threat_name}</h4>
+            <p><strong>Port:</strong> ${r.port}</p>
+            <p><strong>Status:</strong> ${r.status}</p>
+            <p><strong>Service:</strong> ${r.description}</p>
+            <p style="font-size: 0.9em;">${r.threat_description}</p>
+          `;
+          resultsDiv.appendChild(box);
+        });
+      } else {
+        resultsDiv.innerHTML = `<p style="color:red;">${data.error}</p>`;
+      }
+
+      document.getElementById("loading").style.display = "none";
     }
   </script>
 </body>
