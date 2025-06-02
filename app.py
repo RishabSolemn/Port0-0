@@ -57,11 +57,8 @@ def index():
                 results[port] = f"Error: {str(e)}"
     return render_template_string(html_template, results=results, host=host)
 
-if __name__ == "__main__":
-    app.run(debug=True)
-
 import os
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
-    app.run(host="0.0.0.0", port=port)    
+    app.run(host="0.0.0.0", port=port)
