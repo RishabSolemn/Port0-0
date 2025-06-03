@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 import socket
 import ipapi
 import whois
@@ -22,6 +22,14 @@ def get_threat_level(open_ports):
     else:
         return "Low"
 
+@app.route('/')
+def home():
+    return render_template("index.html")
+
+@app.route('/learn')
+def learn():
+    return render_template("learn.html")
+
 @app.route('/scan', methods=['POST'])
 def scan():
     data = request.get_json()
@@ -33,22 +41,22 @@ def scan():
         ip = socket.gethostbyname(target)
         open_ports = scan_ports(ip, start, end)
         geo = ipapi.location(ip=ip)
-        w = whois.whois(target)
+        try:
+            w = whois.whois(target)
+            whois_data = str(w)
+        except:
+            whois_data = "WHOIS lookup failed or unsupported target."
         threat = get_threat_level(open_ports)
 
         return jsonify({
             'ip': ip,
             'open_ports': open_ports,
             'geo': geo,
-            'whois': str(w),
+            'whois': whois_data,
             'threat': threat
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
-@app.route('/')
-def index():
-    return 'PSX – Port Scanner eXtreme API Running'
 
 if __name__ == '__main__':
     app.run(debug=False, host='0.0.0.0', port=10000)
