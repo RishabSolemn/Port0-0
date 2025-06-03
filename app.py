@@ -1,64 +1,61 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, render_template, request, jsonify
 import socket
 import whois
-import requests
+import ipapi
+import os
 
 app = Flask(__name__)
+
+def scan_ports(ip, start, end):
+    open_ports = []
+    for port in range(start, end + 1):
+        try:
+            sock = socket.socket()
+            sock.settimeout(0.5)
+            sock.connect((ip, port))
+            open_ports.append(port)
+            sock.close()
+        except:
+            continue
+    return open_ports
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
+@app.route('/learn')
+def learn():
+    return render_template('learn.html')
+
 @app.route('/scan', methods=['POST'])
 def scan():
     data = request.get_json()
-    target = data.get('target')
-    start_port = int(data.get('start', 1))
-    end_port = int(data.get('end', 1024))
-
-    result = {
-        "ip": "",
-        "open_ports": [],
-        "geo": {},
-        "whois": "",
-        "threat": "Low"
-    }
+    target = data['target']
+    start = int(data['start'])
+    end = int(data['end'])
 
     try:
         ip = socket.gethostbyname(target)
-        result["ip"] = ip
+    except:
+        return jsonify({"error": "Invalid domain"}), 400
 
-        open_ports = []
-        for port in range(start_port, end_port + 1):
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.settimeout(0.5)
-            if sock.connect_ex((ip, port)) == 0:
-                open_ports.append(port)
-            sock.close()
+    open_ports = scan_ports(ip, start, end)
+    threat = "Low" if len(open_ports) < 10 else "Medium" if len(open_ports) < 50 else "High"
 
-        result["open_ports"] = open_ports
+    try:
+        w = whois.whois(ip)
+    except:
+        w = "WHOIS lookup failed"
 
-        # Threat level logic
-        if len(open_ports) >= 50:
-            result["threat"] = "High"
-        elif len(open_ports) >= 10:
-            result["threat"] = "Medium"
+    geo = ipapi.location(ip)
 
-        # Geo info
-        geo = requests.get(f'https://ipapi.co/{ip}/json/').json()
-        result["geo"] = geo if isinstance(geo, dict) else {}
-
-        # WHOIS
-        try:
-            whois_info = whois.whois(target)
-            result["whois"] = str(whois_info)
-        except:
-            result["whois"] = "WHOIS lookup failed"
-
-    except Exception as e:
-        print("Error during scan:", e)
-
-    return jsonify(result)
+    return jsonify({
+        "ip": ip,
+        "open_ports": open_ports,
+        "threat": threat,
+        "geo": geo,
+        "whois": str(w)
+    })
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
