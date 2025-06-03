@@ -1,26 +1,131 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>PSX – Port Scanner eXtreme</title>
   <style>
-    body { background: #0d0d0d; color: #00ffff; font-family: monospace; padding: 2rem; }
-    input, button { padding: 0.5rem; margin: 0.5rem; border: none; border-radius: 5px; }
-    #threat-meter { width: 100%; background: #333; height: 20px; border-radius: 10px; margin-top: 1rem; }
-    #threat-bar { height: 100%; border-radius: 10px; transition: 0.5s ease; width: 0%; }
-    #timeline { margin-top: 2rem; }
-    .modal, .popup { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 1000; }
-    .modal-content, .popup-content { background: #111; padding: 2rem; border-radius: 10px; text-align: center; color: white; }
-    .btn { background: #00ffff; color: #000; cursor: pointer; }
-    .btn:hover { background: #00cccc; }
+    body {
+      background: #0d0d0d;
+      color: #00ffff;
+      font-family: monospace;
+      margin: 0;
+      padding: 2rem;
+      scroll-behavior: smooth;
+    }
+
+    input, button {
+      padding: 0.5rem;
+      margin: 0.5rem;
+      border: none;
+      border-radius: 5px;
+    }
+
+    .btn {
+      background: #00ffff;
+      color: #000;
+      cursor: pointer;
+      transition: 0.3s ease;
+      box-shadow: 0 0 10px #00ffff;
+    }
+
+    .btn:hover {
+      background: #00cccc;
+      transform: scale(1.05);
+      box-shadow: 0 0 20px #00ffff;
+    }
+
+    .section {
+      opacity: 0;
+      transform: translateY(50px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+
+    .section.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    #threat-meter {
+      width: 100%;
+      background: #333;
+      height: 20px;
+      border-radius: 10px;
+      margin-top: 1rem;
+    }
+
+    #threat-bar {
+      height: 100%;
+      border-radius: 10px;
+      transition: 0.5s ease;
+      width: 0%;
+    }
+
+    .modal, .popup {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.85);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-content, .popup-content {
+      background: #111;
+      padding: 2rem;
+      border-radius: 10px;
+      text-align: center;
+      color: white;
+      box-shadow: 0 0 20px #00ffff;
+    }
+
+    #timeline {
+      margin-top: 2rem;
+      line-height: 1.6;
+      border-left: 2px solid #00ffff;
+      padding-left: 1rem;
+    }
+
+    footer {
+      margin-top: 3rem;
+      border-top: 1px solid #00ffff;
+      padding-top: 2rem;
+      font-size: 0.9rem;
+    }
+
+    .contact-card {
+      background: #111;
+      padding: 1rem;
+      border-radius: 8px;
+      border: 1px solid #00ffff;
+      box-shadow: 0 0 10px #00ffff;
+      max-width: 400px;
+      margin: auto;
+    }
+
+    .contact-card a {
+      color: #00ffff;
+      text-decoration: none;
+      display: block;
+      margin-top: 0.5rem;
+    }
+
+    .contact-card a:hover {
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
-  <h1>🔎 PSX – Port Scanner eXtreme</h1>
-  <input type="text" id="target" placeholder="Target domain/IP" required>
-  <input type="number" id="start" placeholder="Start Port" value="1">
-  <input type="number" id="end" placeholder="End Port" value="100">
-  <button class="btn" onclick="showPermissionModal()">Scan</button>
+
+  <h1 class="section">🔎 PSX – Port Scanner eXtreme</h1>
+
+  <div class="section">
+    <input type="text" id="target" placeholder="Target domain/IP" required>
+    <input type="number" id="start" placeholder="Start Port" value="1">
+    <input type="number" id="end" placeholder="End Port" value="100">
+    <button class="btn" onclick="showPermissionModal()">Scan</button>
+  </div>
 
   <div id="permissionModal" class="modal">
     <div class="modal-content">
@@ -40,10 +145,22 @@
     </div>
   </div>
 
-  <div id="threat-meter">
-    <div id="threat-bar"></div>
+  <div class="section">
+    <div id="threat-meter">
+      <div id="threat-bar"></div>
+    </div>
   </div>
-  <div id="timeline"></div>
+
+  <div id="timeline" class="section"></div>
+
+  <footer class="section">
+    <div class="contact-card">
+      <h3>📨 Contact Card</h3>
+      <p>Email: <a href="mailto:Rishabsolemn@gmail.com">Rishabsolemn@gmail.com</a></p>
+      <a href="https://github.com/RishabSolemn" target="_blank">GitHub Profile</a>
+      <a href="https://www.linkedin.com/in/rishab-ravikumar-7b3b28368" target="_blank">LinkedIn</a>
+    </div>
+  </footer>
 
   <script>
     let popupTimeout = setTimeout(() => {
@@ -70,7 +187,7 @@
 
       fetch('/scan', {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ target, start, end })
       })
       .then(res => res.json())
@@ -99,6 +216,21 @@
     function redirectToLearn() {
       window.location.href = "/learn";
     }
+
+    // Scroll reveal logic
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("visible");
+        }
+      });
+    }, {
+      threshold: 0.2
+    });
+
+    document.querySelectorAll(".section").forEach((section) => {
+      observer.observe(section);
+    });
   </script>
 </body>
 </html>
