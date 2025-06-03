@@ -231,6 +231,48 @@
     });
   }
 </script>
+<!-- Port Education Popup -->
+<div id="educationPopup" style="
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.8);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 9999; display: none;
+">
+  <div style="
+    background: rgba(25, 25, 25, 0.9);
+    padding: 30px;
+    border-radius: 16px;
+    border: 2px solid #00ffff;
+    color: white;
+    text-align: center;
+    box-shadow: 0 0 20px #00ffff;
+    max-width: 400px;
+  ">
+    <h2 style="margin-bottom: 20px;">🧠 Curious About Ports?</h2>
+    <p style="font-size: 1.1rem;">
+      Are you unsure about what a port is or how this tool works?
+    </p>
+    <div style="margin-top: 25px;">
+      <button onclick="redirectToLearn()" style="margin-right: 10px;" class="btn btn-primary">Yes, Teach Me</button>
+      <button onclick="closePopup()" class="btn btn-secondary">No, I'm Good</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  setTimeout(() => {
+    document.getElementById('educationPopup').style.display = 'flex';
+  }, 10000); // 10 seconds
+
+  function closePopup() {
+    document.getElementById('educationPopup').style.display = 'none';
+  }
+
+  function redirectToLearn() {
+    window.location.href = "/learn";
+  }
+</script>
 
 </body>
 </html>
