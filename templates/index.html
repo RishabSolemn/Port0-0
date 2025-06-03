@@ -1,232 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>PSX – Port Scanner eXtreme</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body {
-            margin: 0;
-            background-color: #0d0d0d;
-            color: white;
-            font-family: 'Orbitron', sans-serif;
-            overflow-x: hidden;
-        }
-        header, footer {
-            text-align: center;
-            padding: 20px;
-            background: #111;
-            border-bottom: 2px solid #00ffc6;
-        }
-        .container {
-            padding: 30px;
-            max-width: 900px;
-            margin: auto;
-        }
-        input, button {
-            padding: 10px;
-            margin-top: 10px;
-            font-size: 16px;
-            border: none;
-            border-radius: 4px;
-        }
-        input {
-            width: 70%;
-        }
-        button {
-            background-color: #00ffc6;
-            color: #000;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 10px #00ffc6;
-        }
-        .result {
-            margin-top: 20px;
-            background: #111;
-            padding: 20px;
-            border-radius: 10px;
-            border: 1px solid #222;
-        }
-        .glow {
-            transition: transform 0.2s ease;
-        }
-        .glow:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 0 10px #ffe156;
-        }
-        #questionnaire {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-        }
-        #questionnaire-box {
-            background: #111;
-            padding: 30px;
-            border-radius: 10px;
-            border: 1px solid #00ffc6;
-            max-width: 400px;
-            width: 90%;
-        }
-        .timeline {
-            margin-top: 20px;
-            border-left: 3px solid #00ffc6;
-            padding-left: 20px;
-        }
-        .timeline-entry {
-            margin-bottom: 10px;
-            padding-left: 10px;
-            border-left: 2px dashed #444;
-        }
-        footer a {
-            color: #00ffc6;
-            text-decoration: none;
-        }
-        footer a:hover {
-            text-decoration: underline;
-        }
-        .geo-alert {
-            margin-top: 20px;
-            padding: 10px;
-            background: #222;
-            border-left: 5px solid #00ffc6;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>PSX – Port Scanner eXtreme</title>
+  <style>
+    /* Styles for loading animation, threat level bar, and modal */
+    #loading {
+      display: none;
+      /* Add your Rasengan-style animation styles here */
+    }
+    #threat-level {
+      width: 100%;
+      background-color: #ddd;
+    }
+    #threat-level-bar {
+      width: 0%;
+      height: 20px;
+      background-color: green;
+    }
+    #permission-modal {
+      display: none;
+      /* Add your modal styles here */
+    }
+  </style>
 </head>
 <body>
-    <div id="questionnaire">
-        <div id="questionnaire-box">
-            <h2>Before you continue</h2>
-            <p>1. Why do you want to use PSX?</p>
-            <input type="text" id="reason" placeholder="Type your reason here"/><br/><br/>
-            <p>2. Are you 16 or older?</p>
-            <input type="checkbox" id="ageCheck"/> Yes<br/><br/>
-            <p>3. Do you accept full responsibility for unauthorized scans?</p>
-            <input type="checkbox" id="responsibilityCheck"/> Yes<br/><br/>
-            <button onclick="validateQuestionnaire()">Continue</button>
-        </div>
-    </div>
+  <!-- Permission Modal -->
+  <div id="permission-modal">
+    <p>Do you want to start the scan?</p>
+    <button id="yes-button">Yes</button>
+    <button id="no-button">No</button>
+  </div>
 
-    <header>
-        <h1>PSX – Port Scanner eXtreme</h1>
-        <p>Premium Threat Detection with AI & Geo-Intel</p>
-    </header>
+  <!-- Loading Animation -->
+  <div id="loading">
+    <!-- Rasengan-style animation elements -->
+    <p>Scanning...</p>
+  </div>
 
-    <div class="container">
-        <input type="text" id="host" placeholder="Enter IP or Domain"/>
-        <button onclick="startScan()">Start Scan</button>
+  <!-- Threat Level Indicator -->
+  <div id="threat-level">
+    <div id="threat-level-bar"></div>
+  </div>
 
-        <div id="loader" style="display:none; margin-top:20px;">
-            <p>Scanning in progress... ⚡</p>
-        </div>
+  <script>
+    // Show permission modal on page load
+    window.onload = function() {
+      document.getElementById('permission-modal').style.display = 'block';
+    };
 
-        <div id="results" class="result" style="display:none;"></div>
+    // Handle "Yes" button click
+    document.getElementById('yes-button').onclick = function() {
+      document.getElementById('permission-modal').style.display = 'none';
+      startScan();
+    };
 
-        <canvas id="threatChart" width="400" height="200"></canvas>
+    // Handle "No" button click
+    document.getElementById('no-button').onclick = function() {
+      // Attempt to close the window
+      window.open('', '_self').close();
+    };
 
-        <div id="geoAlert" class="geo-alert" style="display:none;"></div>
+    function startScan() {
+      // Show loading animation
+      document.getElementById('loading').style.display = 'block';
 
-        <div class="timeline" id="scanTimeline"></div>
-    </div>
+      // Simulate scan delay
+      setTimeout(function() {
+        // Hide loading animation
+        document.getElementById('loading').style.display = 'none';
 
-    <footer>
-        <p>Contact us: rishabsolemn@gmail.com | 📞 9177329007</p>
-        <p>GitHub: <a href="https://github.com/Rishabsolemn">Rishabsolemn</a> |
-           LinkedIn: <a href="https://linkedin.com/in/rishabravikumar">Rishab Ravikumar</a></p>
-    </footer>
+        // Update threat level bar (example value)
+        var threatLevel = 70; // Replace with actual threat level
+        var bar = document.getElementById('threat-level-bar');
+        bar.style.width = threatLevel + '%';
+        bar.style.backgroundColor = getThreatColor(threatLevel);
+      }, 3000);
+    }
 
-    <script>
-        function validateQuestionnaire() {
-            const reason = document.getElementById("reason").value.trim();
-            const ageCheck = document.getElementById("ageCheck").checked;
-            const responsibilityCheck = document.getElementById("responsibilityCheck").checked;
-
-            if (!reason || !ageCheck || !responsibilityCheck) {
-                alert("Please complete all questions.");
-                return;
-            }
-
-            document.getElementById("questionnaire").style.display = "none";
-        }
-
-        function startScan() {
-            const host = document.getElementById("host").value.trim();
-            if (!host) return alert("Please enter a host.");
-
-            document.getElementById("loader").style.display = "block";
-            document.getElementById("results").style.display = "none";
-            document.getElementById("results").innerHTML = "";
-            fetch("/scan", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ host })
-            })
-            .then(res => res.json())
-            .then(data => {
-                document.getElementById("loader").style.display = "none";
-                renderResults(data);
-                renderChart(data.threat_score);
-                renderGeo(data.geo_data);
-                updateTimeline(data);
-            })
-            .catch(err => {
-                document.getElementById("loader").style.display = "none";
-                alert("Scan failed.");
-            });
-        }
-
-        function renderResults(data) {
-            const container = document.getElementById("results");
-            container.style.display = "block";
-            container.innerHTML = `<h3>Results for ${data.host} (${data.ip})</h3>
-                                   <p><strong>Threat Level:</strong> ${data.threat_rating}</p>
-                                   <ul>` + data.results.map(r => `
-                <li style="color: ${r.color}">${r.port} – ${r.description} (${r.status})</li>
-            `).join("") + "</ul>";
-        }
-
-        function renderChart(score) {
-            const ctx = document.getElementById("threatChart").getContext("2d");
-            new Chart(ctx, {
-                type: "doughnut",
-                data: {
-                    labels: ["Threat Score", "Safe"],
-                    datasets: [{
-                        label: "Threat Level",
-                        data: [score, 100 - score],
-                        backgroundColor: ["#FF3B3B", "#00ffc6"]
-                    }]
-                }
-            });
-        }
-
-        function renderGeo(geo) {
-            const el = document.getElementById("geoAlert");
-            el.style.display = "block";
-            if (geo.error) {
-                el.innerHTML = `<p>${geo.error}</p>`;
-            } else {
-                el.innerHTML = `<strong>🌍 Location:</strong> ${geo.city}, ${geo.region}, ${geo.country}
-                                <br/><strong>🛰 Coordinates:</strong> ${geo.latitude}, ${geo.longitude}`;
-            }
-        }
-
-        function updateTimeline(entry) {
-            const el = document.getElementById("scanTimeline");
-            const node = document.createElement("div");
-            node.classList.add("timeline-entry");
-            node.innerHTML = `<strong>${entry.timestamp}</strong>: Scanned ${entry.host} — Threat: ${entry.threat_rating}`;
-            el.prepend(node);
-        }
-    </script>
+    function getThreatColor(level) {
+      if (level < 30) return 'green';
+      if (level < 70) return 'orange';
+      return 'red';
+    }
+  </script>
 </body>
 </html>
