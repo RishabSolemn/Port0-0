@@ -100,20 +100,6 @@
             background: #222;
             border-left: 5px solid #00ffc6;
         }
-        /* Spinner Animation */
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        #loader div {
-            width: 60px;
-            height: 60px;
-            border: 6px solid #00ffc6;
-            border-top: 6px solid transparent;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: auto;
-        }
     </style>
 </head>
 <body>
@@ -140,7 +126,7 @@
         <button onclick="startScan()">Start Scan</button>
 
         <div id="loader" style="display:none; margin-top:20px;">
-            <div></div>
+            <p>Scanning in progress... ⚡</p>
         </div>
 
         <div id="results" class="result" style="display:none;"></div>
