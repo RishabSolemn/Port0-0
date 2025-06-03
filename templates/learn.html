@@ -1,87 +1,145 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>PSX Learn Mode</title>
+  <meta charset="UTF-8">
+  <title>Learn Port Scanning – PSX</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Animate on Scroll (AOS) -->
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap" rel="stylesheet">
   <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(to bottom right, #0f2027, #203a43, #2c5364);
-      color: #ffffff;
+    * {
       margin: 0;
-      padding: 20px;
+      padding: 0;
+      box-sizing: border-box;
     }
+
+    body {
+      background: linear-gradient(145deg, #0d0d0d, #121212);
+      font-family: 'Orbitron', sans-serif;
+      color: #00f7ff;
+      padding: 30px;
+      scroll-behavior: smooth;
+    }
+
     header {
       text-align: center;
-      padding: 30px 10px;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid #00f7ff55;
     }
-    h1 {
-      font-size: 2.5rem;
-      margin-bottom: 10px;
-      color: #00fff7;
+
+    header h1 {
+      font-size: 3rem;
+      color: #00f7ff;
+      text-shadow: 0 0 10px #00f7ff;
     }
-    .card {
-      background-color: rgba(255, 255, 255, 0.05);
-      border: 1px solid #00fff7;
-      border-radius: 15px;
-      padding: 20px;
-      margin: 20px auto;
-      max-width: 700px;
-      box-shadow: 0 0 15px #00fff7;
+
+    section {
+      margin: 2rem 0;
+      padding: 1rem;
+      border-radius: 12px;
+      background: rgba(0, 255, 255, 0.05);
+      border: 1px solid #00f7ff22;
+      box-shadow: 0 0 10px #00f7ff22;
     }
-    .card h3 {
-      color: #00ffff;
+
+    section h2 {
+      font-size: 2rem;
+      color: #00f7ff;
+      margin-bottom: 1rem;
+      text-shadow: 0 0 5px #00f7ff99;
     }
-    .back-button {
-      display: block;
-      margin: 30px auto;
+
+    ul, p {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      margin-left: 1rem;
+    }
+
+    a.glow-btn {
+      display: inline-block;
+      margin-top: 2rem;
       padding: 12px 24px;
-      background-color: #00fff7;
-      color: #000;
-      border: none;
+      font-size: 1.2rem;
+      color: #00f7ff;
+      background: transparent;
+      border: 2px solid #00f7ff;
       border-radius: 8px;
-      cursor: pointer;
-      font-weight: bold;
-      transition: all 0.3s ease;
+      text-decoration: none;
+      text-shadow: 0 0 5px #00f7ff88;
+      box-shadow: 0 0 15px #00f7ff33;
+      transition: 0.3s ease;
     }
-    .back-button:hover {
-      background-color: #01c4b3;
+
+    a.glow-btn:hover {
+      background: #00f7ff;
+      color: #0d0d0d;
+      box-shadow: 0 0 25px #00f7ff;
+    }
+
+    footer {
+      margin-top: 4rem;
+      text-align: center;
+      font-size: 0.9rem;
+      color: #00f7ff66;
     }
   </style>
 </head>
 <body>
-  <header>
-    <h1>PSX Learn Mode</h1>
-    <p>Understand common ports and their potential risks</p>
+
+  <header data-aos="fade-down">
+    <h1>📘 Learn About Port Scanning</h1>
   </header>
 
-  <div class="card">
-    <h3>Port 21 – FTP</h3>
-    <p>Used for file transfers, but transmits data unencrypted. Vulnerable to sniffing and brute force attacks. Consider replacing with SFTP.</p>
+  <section data-aos="fade-up">
+    <h2>🔍 What is Port Scanning?</h2>
+    <p>Port scanning is a technique used to discover open ports on a target system. These open ports can reveal running services, which may be vulnerable or misconfigured. PSX helps you responsibly analyze and interpret these findings.</p>
+  </section>
+
+  <section data-aos="fade-right">
+    <h2>⚠️ Legal Reminder</h2>
+    <p>Unauthorized scanning of systems without consent is illegal in many regions. Always ensure you have permission before scanning a device or network.</p>
+  </section>
+
+  <section data-aos="fade-left">
+    <h2>🔢 Common Port Numbers</h2>
+    <ul>
+      <li><strong>21</strong> – FTP (File Transfer Protocol)</li>
+      <li><strong>22</strong> – SSH (Secure Shell)</li>
+      <li><strong>23</strong> – Telnet (Insecure)</li>
+      <li><strong>53</strong> – DNS (Domain Name System)</li>
+      <li><strong>80</strong> – HTTP (Web traffic)</li>
+      <li><strong>443</strong> – HTTPS (Secure Web)</li>
+    </ul>
+  </section>
+
+  <section data-aos="fade-up">
+    <h2>💡 Use Cases</h2>
+    <ul>
+      <li>Penetration testing</li>
+      <li>Firewall rule validation</li>
+      <li>Network auditing</li>
+      <li>Service enumeration for IT infrastructure</li>
+    </ul>
+  </section>
+
+  <div style="text-align: center;" data-aos="zoom-in">
+    <a class="glow-btn" href="/index.html">← Back to Scanner</a>
   </div>
 
-  <div class="card">
-    <h3>Port 22 – SSH</h3>
-    <p>Secure shell for remote access. Keep updated and use strong authentication to avoid brute force risks.</p>
-  </div>
+  <footer data-aos="fade-up">
+    © 2025 PSX – Port Scanner eXtreme
+  </footer>
 
-  <div class="card">
-    <h3>Port 80 – HTTP</h3>
-    <p>Unsecured web traffic. Should redirect to HTTPS (port 443) to prevent MITM attacks.</p>
-  </div>
-
-  <div class="card">
-    <h3>Port 443 – HTTPS</h3>
-    <p>Secure web traffic. Ensure certificates are valid and modern protocols (TLS 1.2+) are used.</p>
-  </div>
-
-  <div class="card">
-    <h3>Port 3389 – RDP</h3>
-    <p>Remote Desktop Protocol. Often targeted. Should be firewalled and monitored closely.</p>
-  </div>
-
- <a href="/"><button class="back-button">← Back to Scanner</button></a>
-
+  <!-- AOS Script -->
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script>
+    AOS.init({
+      once: true,
+      duration: 1000
+    });
+  </script>
 </body>
 </html>
