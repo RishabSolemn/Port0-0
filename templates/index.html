@@ -3,85 +3,143 @@
 <head>
   <meta charset="UTF-8">
   <title>PSX – Port Scanner eXtreme</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
-    /* Styles for loading animation, threat level bar, and modal */
+    /* Rasengan-style loading animation */
     #loading {
       display: none;
-      /* Add your Rasengan-style animation styles here */
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1051;
     }
+
+    .rasengan {
+      width: 100px;
+      height: 100px;
+      border: 5px solid #00f;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Threat level bar */
     #threat-level {
       width: 100%;
       background-color: #ddd;
+      margin-top: 20px;
     }
+
     #threat-level-bar {
       width: 0%;
       height: 20px;
       background-color: green;
     }
-    #permission-modal {
-      display: none;
-      /* Add your modal styles here */
-    }
   </style>
 </head>
-<body>
-  <!-- Permission Modal -->
-  <div id="permission-modal">
-    <p>Do you want to start the scan?</p>
-    <button id="yes-button">Yes</button>
-    <button id="no-button">No</button>
-  </div>
+<body class="container my-5">
+
+  <!-- Pre-Scan Questionnaire -->
+  <form id="scan-form">
+    <div class="mb-3">
+      <label for="target" class="form-label">Enter Domain/IP:</label>
+      <input type="text" class="form-control" id="target" required>
+    </div>
+    <div class="mb-3">
+      <label for="user-info" class="form-label">Your Name:</label>
+      <input type="text" class="form-control" id="user-info" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Start Scan</button>
+  </form>
 
   <!-- Loading Animation -->
   <div id="loading">
-    <!-- Rasengan-style animation elements -->
-    <p>Scanning...</p>
+    <div class="rasengan"></div>
+    <p class="text-center mt-2">Scanning...</p>
   </div>
 
   <!-- Threat Level Indicator -->
-  <div id="threat-level">
+  <div id="threat-level" class="mt-5">
     <div id="threat-level-bar"></div>
   </div>
 
+  <!-- Permission Modal -->
+  <div class="modal fade" id="permissionModal" tabindex="-1" aria-labelledby="permissionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Confirm Scan</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          Do you want to start the scan?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="no-button">No</button>
+          <button type="button" class="btn btn-primary" id="yes-button">Yes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
   <script>
-    // Show permission modal on page load
-    window.onload = function() {
-      document.getElementById('permission-modal').style.display = 'block';
-    };
+    const scanForm = document.getElementById('scan-form');
+    const loading = document.getElementById('loading');
+    const threatBar = document.getElementById('threat-level-bar');
+    const permissionModal = new bootstrap.Modal(document.getElementById('permissionModal'));
+    let targetInput = '';
 
-    // Handle "Yes" button click
-    document.getElementById('yes-button').onclick = function() {
-      document.getElementById('permission-modal').style.display = 'none';
+    scanForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      targetInput = document.getElementById('target').value;
+      permissionModal.show();
+    });
+
+    document.getElementById('yes-button').addEventListener('click', function() {
+      permissionModal.hide();
       startScan();
-    };
+    });
 
-    // Handle "No" button click
-    document.getElementById('no-button').onclick = function() {
-      // Attempt to close the window
+    document.getElementById('no-button').addEventListener('click', function() {
       window.open('', '_self').close();
-    };
+    });
 
     function startScan() {
-      // Show loading animation
-      document.getElementById('loading').style.display = 'block';
-
+      loading.style.display = 'block';
       // Simulate scan delay
       setTimeout(function() {
-        // Hide loading animation
-        document.getElementById('loading').style.display = 'none';
-
-        // Update threat level bar (example value)
-        var threatLevel = 70; // Replace with actual threat level
-        var bar = document.getElementById('threat-level-bar');
-        bar.style.width = threatLevel + '%';
-        bar.style.backgroundColor = getThreatColor(threatLevel);
+        loading.style.display = 'none';
+        // Example threat level value
+        const openPorts = Math.floor(Math.random() * 100);
+        updateThreatLevel(openPorts);
       }, 3000);
     }
 
-    function getThreatColor(level) {
-      if (level < 30) return 'green';
-      if (level < 70) return 'orange';
-      return 'red';
+    function updateThreatLevel(openPorts) {
+      let level = '';
+      let color = '';
+      if (openPorts < 10) {
+        level = 'Low';
+        color = 'green';
+      } else if (openPorts < 50) {
+        level = 'Medium';
+        color = 'orange';
+      } else {
+        level = 'High';
+        color = 'red';
+      }
+      threatBar.style.width = Math.min(openPorts, 100) + '%';
+      threatBar.style.backgroundColor = color;
+      threatBar.textContent = `Threat Level: ${level} (${openPorts} open ports)`;
     }
   </script>
 </body>
