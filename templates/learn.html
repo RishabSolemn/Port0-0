@@ -1,18 +1,86 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Learn About Ports</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PSX Learn Mode</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to bottom right, #0f2027, #203a43, #2c5364);
+      color: #ffffff;
+      margin: 0;
+      padding: 20px;
+    }
+    header {
+      text-align: center;
+      padding: 30px 10px;
+    }
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      color: #00fff7;
+    }
+    .card {
+      background-color: rgba(255, 255, 255, 0.05);
+      border: 1px solid #00fff7;
+      border-radius: 15px;
+      padding: 20px;
+      margin: 20px auto;
+      max-width: 700px;
+      box-shadow: 0 0 15px #00fff7;
+    }
+    .card h3 {
+      color: #00ffff;
+    }
+    .back-button {
+      display: block;
+      margin: 30px auto;
+      padding: 12px 24px;
+      background-color: #00fff7;
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s ease;
+    }
+    .back-button:hover {
+      background-color: #01c4b3;
+    }
+  </style>
 </head>
-<body style="background:#111; color:#0ff; font-family:sans-serif; text-align:center; padding:2rem;">
-  <h1>🧠 Learn About Ports</h1>
-  <p>Ports are communication gateways on devices. For example:</p>
-  <ul style="list-style:none;">
-    <li>🌐 80 = HTTP</li>
-    <li>🔒 443 = HTTPS</li>
-    <li>📬 25 = SMTP (Email)</li>
-  </ul>
-  <p>Each service runs on a specific port. Port scanning helps discover open services.</p>
-  <a href="/" style="color:cyan;">← Back to Scanner</a>
+<body>
+  <header>
+    <h1>PSX Learn Mode</h1>
+    <p>Understand common ports and their potential risks</p>
+  </header>
+
+  <div class="card">
+    <h3>Port 21 – FTP</h3>
+    <p>Used for file transfers, but transmits data unencrypted. Vulnerable to sniffing and brute force attacks. Consider replacing with SFTP.</p>
+  </div>
+
+  <div class="card">
+    <h3>Port 22 – SSH</h3>
+    <p>Secure shell for remote access. Keep updated and use strong authentication to avoid brute force risks.</p>
+  </div>
+
+  <div class="card">
+    <h3>Port 80 – HTTP</h3>
+    <p>Unsecured web traffic. Should redirect to HTTPS (port 443) to prevent MITM attacks.</p>
+  </div>
+
+  <div class="card">
+    <h3>Port 443 – HTTPS</h3>
+    <p>Secure web traffic. Ensure certificates are valid and modern protocols (TLS 1.2+) are used.</p>
+  </div>
+
+  <div class="card">
+    <h3>Port 3389 – RDP</h3>
+    <p>Remote Desktop Protocol. Often targeted. Should be firewalled and monitored closely.</p>
+  </div>
+
+  <a href="index.html"><button class="back-button">← Back to Scanner</button></a>
 </body>
 </html>
