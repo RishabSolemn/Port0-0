@@ -1,67 +1,37 @@
 from flask import Flask, render_template, request, jsonify
 import socket
-import threading
-import ipwhois
 import whois
-import dns.resolver
+from ipwhois import IPWhois
 import requests
-from datetime import datetime
 
 app = Flask(__name__)
 
-# === AI-style interpretation for common ports ===
-port_descriptions = {
-    20: "FTP Data Transfer",
-    21: "FTP Control",
-    22: "SSH - Secure Shell",
-    23: "Telnet - Remote Login",
-    25: "SMTP - Email Sending",
-    53: "DNS - Domain Name System",
-    80: "HTTP - Web Traffic",
-    110: "POP3 - Incoming Email",
-    123: "NTP - Network Time Protocol",
-    143: "IMAP - Email Retrieval",
-    443: "HTTPS - Secure Web",
-    3306: "MySQL Database",
-    3389: "Remote Desktop",
-    8080: "Alternative Web Port"
-}
-
-def scan_port(ip, port, results):
+def scan_ports(target, start_port=1, end_port=1024):
+    open_ports = []
     try:
-        sock = socket.socket()
-        sock.settimeout(0.5)
-        sock.connect((ip, port))
-        description = port_descriptions.get(port, "Unknown service")
-        results.append({
-            'port': port,
-            'status': 'open',
-            'description': description
-        })
-        sock.close()
-    except:
-        pass
+        ip = socket.gethostbyname(target)
+        for port in range(start_port, end_port + 1):
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(0.5)
+            if s.connect_ex((ip, port)) == 0:
+                open_ports.append(port)
+            s.close()
+        return open_ports
+    except socket.gaierror:
+        return []
 
-def get_geo_ip(ip):
+def get_geo_info(ip):
     try:
-        r = requests.get(f"https://ipapi.co/{ip}/json/")
-        data = r.json()
-        return {
-            'ip': ip,
-            'city': data.get('city'),
-            'region': data.get('region'),
-            'country': data.get('country_name'),
-            'org': data.get('org')
-        }
+        response = requests.get(f'https://ipapi.co/{ip}/json/')
+        return response.json()
     except:
         return {}
 
-def check_dns_deception(domain):
+def get_whois_info(target):
     try:
-        answers = dns.resolver.resolve(domain, 'A')
-        return [str(rdata) for rdata in answers]
+        return whois.whois(target)
     except:
-        return ["Failed to resolve"]
+        return {}
 
 @app.route('/')
 def index():
@@ -69,40 +39,29 @@ def index():
 
 @app.route('/scan', methods=['POST'])
 def scan():
-    ip_or_domain = request.form['target']
-    try:
-        ip = socket.gethostbyname(ip_or_domain)
-    except:
-        return jsonify({'error': 'Invalid domain or IP'}), 400
+    data = request.get_json()
+    target = data.get('target')
+    start = int(data.get('start', 1))
+    end = int(data.get('end', 1024))
 
-    open_ports = []
-    threads = []
+    open_ports = scan_ports(target, start, end)
+    ip = socket.gethostbyname(target)
+    geo = get_geo_info(ip)
+    whois_data = get_whois_info(target)
 
-    for port in range(1, 1025):
-        t = threading.Thread(target=scan_port, args=(ip, port, open_ports))
-        t.start()
-        threads.append(t)
-
-    for t in threads:
-        t.join()
-
-    threat_level = "Low"
-    if len(open_ports) >= 50:
-        threat_level = "High"
-    elif len(open_ports) >= 10:
-        threat_level = "Medium"
-
-    geo_info = get_geo_ip(ip)
-    deception_check = check_dns_deception(ip_or_domain)
-    timeline = [datetime.now().strftime("%H:%M:%S") for _ in open_ports]
+    threat_level = (
+        "High" if len(open_ports) >= 50 else
+        "Medium" if len(open_ports) >= 10 else
+        "Low"
+    )
 
     return jsonify({
-        'open_ports': sorted(open_ports, key=lambda x: x['port']),
-        'threat_level': threat_level,
-        'geo_info': geo_info,
-        'deception': deception_check,
-        'timeline': timeline
+        'open_ports': open_ports,
+        'ip': ip,
+        'geo': geo,
+        'whois': str(whois_data),
+        'threat': threat_level
     })
 
 if __name__ == '__main__':
-   app.run(host="0.0.0.0", port=10000, debug=True)
+    app.run(debug=True, host='0.0.0.0', port=10000)
