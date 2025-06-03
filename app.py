@@ -1,98 +1,40 @@
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify, send_file, render_template
 import os
 import json
 import datetime
-import socket
 
 app = Flask(__name__)
+
+# Sample scan log (should be updated dynamically in real use)
 SCAN_LOG = []
 
-# Threat scoring system
-def get_threat_score(open_ports):
-    count = len(open_ports)
-    if count >= 50:
-        return "High", 90
-    elif count >= 10:
-        return "Medium", 50
-    else:
-        return "Low", 15
-
-# AI-powered port interpretation
-def interpret_port(port):
-    descriptions = {
-        21: "FTP - File Transfer Protocol",
-        22: "SSH - Secure Shell",
-        23: "Telnet - Remote Terminal",
-        25: "SMTP - Email",
-        53: "DNS - Domain Name System",
-        80: "HTTP - Web Traffic",
-        110: "POP3 - Email Retrieval",
-        143: "IMAP - Email Access",
-        443: "HTTPS - Secure Web Traffic",
-        3306: "MySQL Database",
-        3389: "Remote Desktop",
-        8080: "Alternative HTTP"
-    }
-    return descriptions.get(port, "Unknown or uncommon service")
-
-# Fake DNS/CDN deception check
-def check_dns_deception(host):
-    try:
-        ip = socket.gethostbyname(host)
-        return "cdn" in host.lower() or ip.startswith("192.")
-    except:
-        return False
-
-def port_scan(host, ports):
-    open_ports = []
-    for port in ports:
-        try:
-            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                s.settimeout(0.3)
-                if s.connect_ex((host, port)) == 0:
-                    open_ports.append(port)
-        except:
-            continue
-    return open_ports
+@app.route("/")
+def home():
+    return render_template("index.html")
 
 @app.route("/scan", methods=["POST"])
 def scan():
     data = request.get_json()
     host = data.get("host")
 
-    try:
-        ip = socket.gethostbyname(host)
-    except socket.gaierror:
-        return jsonify({"error": "Invalid host"}), 400
-
-    ports_to_scan = list(range(1, 1025))
-    open_ports = port_scan(ip, ports_to_scan)
-    threat_rating, threat_score = get_threat_score(open_ports)
-
-    results = [{
-        "port": port,
-        "status": "open",
-        "description": interpret_port(port),
-        "color": "#FF3B3B" if port < 1024 else "#00ffc6"
-    } for port in open_ports]
-
-    geo_data = {
-        "city": "Unknown",
-        "region": "Unknown",
-        "country": "Unknown",
-        "latitude": "0.0000",
-        "longitude": "0.0000"
-    }
-
+    # Placeholder scan result
     result = {
         "host": host,
-        "ip": ip,
+        "ip": "192.168.1.1",
         "timestamp": datetime.datetime.now().isoformat(),
-        "threat_rating": threat_rating,
-        "threat_score": threat_score,
-        "results": results,
-        "geo_data": geo_data,
-        "dns_deception": check_dns_deception(host)
+        "threat_rating": "Low",
+        "threat_score": 15,
+        "results": [
+            {"port": 80, "status": "open", "description": "HTTP", "color": "#00ffc6"},
+            {"port": 443, "status": "open", "description": "HTTPS", "color": "#00ffc6"},
+        ],
+        "geo_data": {
+            "city": "Example City",
+            "region": "Example Region",
+            "country": "Example Country",
+            "latitude": "0.0000",
+            "longitude": "0.0000"
+        }
     }
 
     SCAN_LOG.append(result)
@@ -109,12 +51,6 @@ def download_log():
 def scan_log():
     return jsonify(SCAN_LOG)
 
-from flask import send_from_directory
-
-@app.route("/")
-def home():
-    return send_from_directory(directory="/app", path="index.html")
-
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
+    port = int(os.environ.get("PORT", 5000))  # Render uses PORT env var
     app.run(host="0.0.0.0", port=port)
