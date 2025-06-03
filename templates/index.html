@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>PSX – Port Scanner eXtreme</title>
   <style>
     body {
@@ -25,11 +25,9 @@
       color: #0ff;
       text-shadow: 0 0 10px #0ff;
     }
-
     section {
       padding: 3rem 2rem;
     }
-
     .segment {
       margin: 2rem auto;
       padding: 2rem;
@@ -41,12 +39,10 @@
       max-width: 900px;
       transition: 0.3s;
     }
-
     .segment:hover {
       transform: scale(1.02);
       box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
     }
-
     input, button {
       padding: 0.8rem;
       margin: 0.5rem;
@@ -55,13 +51,11 @@
       outline: none;
       font-size: 1rem;
     }
-
     input {
       background: #222;
       color: #0ff;
       border: 1px solid #0ff;
     }
-
     button {
       background: #0ff;
       color: #000;
@@ -69,13 +63,11 @@
       cursor: pointer;
       box-shadow: 0 0 10px #0ff;
     }
-
     #timeline {
       font-size: 0.95rem;
       line-height: 1.5;
       margin-top: 1rem;
     }
-
     #threat-meter {
       height: 20px;
       background: #333;
@@ -83,14 +75,12 @@
       overflow: hidden;
       margin: 1rem 0;
     }
-
     #threat-bar {
       height: 100%;
       width: 0;
       background: lime;
       transition: width 1s ease;
     }
-
     .contact-card {
       background: rgba(0, 0, 0, 0.4);
       border: 2px solid #0ff;
@@ -103,7 +93,6 @@
       position: relative;
       overflow: hidden;
     }
-
     .contact-card::before {
       content: '';
       position: absolute;
@@ -115,12 +104,10 @@
       animation: circuit 10s linear infinite;
       opacity: 0.05;
     }
-
     @keyframes circuit {
       0% { transform: translate(0, 0); }
       100% { transform: translate(100px, 100px); }
     }
-
     .modal {
       display: none;
       position: fixed;
@@ -131,7 +118,6 @@
       justify-content: center;
       align-items: center;
     }
-
     .modal-content {
       background: #111;
       padding: 2rem;
@@ -141,11 +127,9 @@
       text-align: center;
       color: #0ff;
     }
-
     .modal-content button {
       margin-top: 1rem;
     }
-
   </style>
 </head>
 <body>
@@ -159,7 +143,7 @@
   <input type="text" id="target" placeholder="example.com or IP">
   <input type="number" id="start" placeholder="Start Port" value="1">
   <input type="number" id="end" placeholder="End Port" value="1024">
-  <button onclick="showPermissionModal()">Scan</button>
+  <button onclick="handleScanClick()">Scan</button>
 </section>
 
 <section class="segment">
@@ -191,47 +175,6 @@
   </div>
 </div>
 
-<script>
-  function showPermissionModal() {
-    document.getElementById('permissionModal').style.display = 'flex';
-  }
-
-  function confirmScan() {
-    document.getElementById('permissionModal').style.display = 'none';
-    startScan();
-  }
-
-  function startScan() {
-    const target = document.getElementById('target').value;
-    const start = document.getElementById('start').value;
-    const end = document.getElementById('end').value;
-
-    const timeline = document.getElementById('timeline');
-    timeline.innerHTML = '🔧 Resolving target...<br>';
-
-    fetch('/scan', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ target, start, end })
-    })
-    .then(res => res.json())
-    .then(data => {
-      timeline.innerHTML += `🌐 IP: ${data.ip}<br>`;
-      timeline.innerHTML += `📦 Open Ports: ${data.open_ports.join(', ') || 'None'}<br>`;
-      timeline.innerHTML += `📍 Location: ${data.geo.city || 'Unknown'}, ${data.geo.country_name || 'N/A'}<br>`;
-      timeline.innerHTML += `🔎 WHOIS: ${data.whois.substring(0, 300)}...<br>`;
-      timeline.innerHTML += `⚠️ Threat Level: <strong>${data.threat}</strong><br>`;
-
-      const threatBar = document.getElementById('threat-bar');
-      threatBar.style.width = data.threat === "High" ? "100%" : data.threat === "Medium" ? "60%" : "30%";
-      threatBar.style.background = data.threat === "High" ? "red" : data.threat === "Medium" ? "orange" : "lime";
-    })
-    .catch(() => {
-      timeline.innerHTML = '❌ Scan failed. Check your input or try again.';
-    });
-  }
-</script>
-<!-- Port Education Popup -->
 <div id="educationPopup" style="
   position: fixed;
   top: 0; left: 0; width: 100%; height: 100%;
@@ -261,9 +204,19 @@
 </div>
 
 <script>
-  setTimeout(() => {
-    document.getElementById('educationPopup').style.display = 'flex';
-  }, 10000); // 10 seconds
+  let popupTimeout;
+
+  // Trigger education popup after 10 seconds
+  window.addEventListener('load', () => {
+    popupTimeout = setTimeout(() => {
+      document.getElementById('educationPopup').style.display = 'flex';
+    }, 10000);
+  });
+
+  function handleScanClick() {
+    clearTimeout(popupTimeout); // Cancel popup if Scan is clicked early
+    showPermissionModal();
+  }
 
   function closePopup() {
     document.getElementById('educationPopup').style.display = 'none';
@@ -271,6 +224,50 @@
 
   function redirectToLearn() {
     window.location.href = "/learn";
+  }
+
+  function showPermissionModal() {
+    document.getElementById('permissionModal').style.display = 'flex';
+  }
+
+  function confirmScan() {
+    document.getElementById('permissionModal').style.display = 'none';
+    startScan();
+  }
+
+  function startScan() {
+    const target = document.getElementById('target').value;
+    const start = document.getElementById('start').value;
+    const end = document.getElementById('end').value;
+
+    const timeline = document.getElementById('timeline');
+    timeline.innerHTML = '🔧 Resolving target...<br>';
+
+    fetch('/scan', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ target, start, end })
+    })
+    .then(res => res.json())
+    .then(data => {
+      const geo = data.geo || {};
+      const whois = data.whois || 'No WHOIS data';
+      const ports = data.open_ports?.length ? data.open_ports.join(', ') : 'None';
+      const threat = data.threat || 'Unknown';
+
+      timeline.innerHTML += `🌐 IP: ${data.ip || 'N/A'}<br>`;
+      timeline.innerHTML += `📦 Open Ports: ${ports}<br>`;
+      timeline.innerHTML += `📍 Location: ${geo.city || 'Unknown'}, ${geo.country_name || 'N/A'}<br>`;
+      timeline.innerHTML += `🔎 WHOIS: ${whois.substring(0, 300)}...<br>`;
+      timeline.innerHTML += `⚠️ Threat Level: <strong>${threat}</strong><br>`;
+
+      const threatBar = document.getElementById('threat-bar');
+      threatBar.style.width = threat === "High" ? "100%" : threat === "Medium" ? "60%" : "30%";
+      threatBar.style.background = threat === "High" ? "red" : threat === "Medium" ? "orange" : "lime";
+    })
+    .catch(() => {
+      timeline.innerHTML = '❌ Scan failed. Check your input or try again.';
+    });
   }
 </script>
 
