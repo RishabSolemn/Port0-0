@@ -1,395 +1,103 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
   <title>PSX – Port Scanner eXtreme</title>
   <style>
-    body {
-      margin: 0;
-      background: linear-gradient(135deg, #0f0f0f, #1a1a1a);
-      color: #fff;
-      font-family: 'Segoe UI', sans-serif;
-      overflow-x: hidden;
-      scroll-behavior: smooth;
-    }
-    header {
-      text-align: center;
-      padding: 3rem;
-      background: rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(8px);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    header h1 {
-      font-size: 3rem;
-      color: #0ff;
-      text-shadow: 0 0 10px #0ff;
-    }
-    section {
-      padding: 3rem 2rem;
-    }
-    .segment {
-      margin: 2rem auto;
-      padding: 2rem;
-      background: rgba(255, 255, 255, 0.06);
-      backdrop-filter: blur(10px);
-      border-radius: 15px;
-      box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
-      border: 1px solid rgba(0, 255, 255, 0.3);
-      max-width: 900px;
-      transition: 0.3s;
-    }
-    .segment:hover {
-      transform: scale(1.02);
-      box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
-    }
-    input, button {
-      padding: 0.8rem;
-      margin: 0.5rem;
-      border-radius: 10px;
-      border: none;
-      outline: none;
-      font-size: 1rem;
-    }
-    input {
-      background: #222;
-      color: #0ff;
-      border: 1px solid #0ff;
-    }
-    button {
-      background: #0ff;
-      color: #000;
-      font-weight: bold;
-      cursor: pointer;
-      box-shadow: 0 0 10px #0ff;
-    }
-    #timeline {
-      font-size: 0.95rem;
-      line-height: 1.5;
-      margin-top: 1rem;
-    }
-    #threat-meter {
-      height: 20px;
-      background: #333;
-      border-radius: 10px;
-      overflow: hidden;
-      margin: 1rem 0;
-    }
-    #threat-bar {
-      height: 100%;
-      width: 0;
-      background: lime;
-      transition: width 1s ease;
-    }
-    .contact-card {
-      background: rgba(0, 0, 0, 0.4);
-      border: 2px solid #0ff;
-      border-radius: 20px;
-      padding: 2rem;
-      text-align: center;
-      backdrop-filter: blur(15px);
-      color: #fff;
-      box-shadow: 0 0 20px #0ff;
-      position: relative;
-      overflow: hidden;
-    }
-    .contact-card::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: repeating-linear-gradient(45deg, #0ff 0, #0ff 2px, transparent 2px, transparent 10px);
-      animation: circuit 10s linear infinite;
-      opacity: 0.05;
-    }
-    @keyframes circuit {
-      0% { transform: translate(0, 0); }
-      100% { transform: translate(100px, 100px); }
-    }
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.8);
-      backdrop-filter: blur(4px);
-      z-index: 1000;
-      justify-content: center;
-      align-items: center;
-    }
-    .modal-content {
-      background: #111;
-      padding: 2rem;
-      border: 2px solid #0ff;
-      border-radius: 20px;
-      max-width: 500px;
-      text-align: center;
-      color: #0ff;
-    }
-    .modal-content button {
-      margin-top: 1rem;
-    }
+    body { background: #0d0d0d; color: #00ffff; font-family: monospace; padding: 2rem; }
+    input, button { padding: 0.5rem; margin: 0.5rem; border: none; border-radius: 5px; }
+    #threat-meter { width: 100%; background: #333; height: 20px; border-radius: 10px; margin-top: 1rem; }
+    #threat-bar { height: 100%; border-radius: 10px; transition: 0.5s ease; width: 0%; }
+    #timeline { margin-top: 2rem; }
+    .modal, .popup { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 1000; }
+    .modal-content, .popup-content { background: #111; padding: 2rem; border-radius: 10px; text-align: center; color: white; }
+    .btn { background: #00ffff; color: #000; cursor: pointer; }
+    .btn:hover { background: #00cccc; }
   </style>
 </head>
 <body>
-
-<header>
-  <h1>PSX – Port Scanner eXtreme</h1>
-</header>
-
-<section class="segment">
-  <h2>🔍 Scan Target</h2>
-  <input type="text" id="target" placeholder="example.com or IP">
+  <h1>🔎 PSX – Port Scanner eXtreme</h1>
+  <input type="text" id="target" placeholder="Target domain/IP" required>
   <input type="number" id="start" placeholder="Start Port" value="1">
-  <input type="number" id="end" placeholder="End Port" value="1024">
-  <button onclick="handleScanClick()">Scan</button>
-</section>
+  <input type="number" id="end" placeholder="End Port" value="100">
+  <button class="btn" onclick="showPermissionModal()">Scan</button>
 
-<section class="segment">
-  <h2>📜 Scan Timeline</h2>
-  <div id="timeline">No scan yet.</div>
-</section>
-
-<section class="segment">
-  <h2>⚠️ Threat Meter</h2>
-  <div id="threat-meter"><div id="threat-bar"></div></div>
-</section>
-
-<section class="segment">
-  <h2>📬 Contact Us</h2>
-  <div class="contact-card">
-    <p><strong>Email:</strong> <a href="mailto:Rishabsolemn@gmail.com" style="color:#0ff;">Rishabsolemn@gmail.com</a></p>
-    <p><strong>GitHub:</strong> <a href="https://github.com/RishabSolemn" target="_blank" style="color:#0ff;">github.com/RishabSolemn</a></p>
-    <p><strong>LinkedIn:</strong> <a href="https://www.linkedin.com/in/rishab-ravikumar-7b3b28368" target="_blank" style="color:#0ff;">Rishab Ravikumar</a></p>
-  </div>
-</section>
-
-<div id="permissionModal" class="modal">
-  <div class="modal-content">
-    <h3>⚠️ Permission Required</h3>
-    <p>Do you confirm that you have permission to scan the entered domain/IP?</p>
-    <p>Do you accept full responsibility if you do not?</p>
-    <button onclick="confirmScan()">Yes, Proceed</button>
-    <button onclick="window.close()">No, Exit</button>
-  </div>
-</div>
-
-<div id="educationPopup" style="
-  position: fixed;
-  top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(0,0,0,0.8);
-  display: flex; align-items: center; justify-content: center;
-  z-index: 9999; display: none;
-">
-  <div style="
-    background: rgba(25, 25, 25, 0.9);
-    padding: 30px;
-    border-radius: 16px;
-    border: 2px solid #00ffff;
-    color: white;
-    text-align: center;
-    box-shadow: 0 0 20px #00ffff;
-    max-width: 400px;
-  ">
-    <h2 style="margin-bottom: 20px;">🧠 Curious About Ports?</h2>
-    <p style="font-size: 1.1rem;">
-      Are you unsure about what a port is or how this tool works?
-    </p>
-    <div style="margin-top: 25px;">
-      <button onclick="redirectToLearn()" style="margin-right: 10px;" class="btn btn-primary">Yes, Teach Me</button>
-      <button onclick="closePopup()" class="btn btn-secondary">No, I'm Good</button>
+  <div id="permissionModal" class="modal">
+    <div class="modal-content">
+      <h2>Permission Required</h2>
+      <p>Do you have permission to scan this domain/IP?</p>
+      <button class="btn" onclick="confirmScan()">Yes, I Accept</button>
+      <button class="btn" onclick="window.close()">No</button>
     </div>
   </div>
-</div>
 
-<script>
-  let popupTimeout;
-
-  // Trigger education popup after 10 seconds
-  window.addEventListener('load', () => {
-    popupTimeout = setTimeout(() => {
-      document.getElementById('educationPopup').style.display = 'flex';
-    }, 10000);
-  });
-
-  function handleScanClick() {
-    clearTimeout(popupTimeout); // Cancel popup if Scan is clicked early
-    showPermissionModal();
-  }
-
-  function closePopup() {
-    document.getElementById('educationPopup').style.display = 'none';
-  }
-
-  function redirectToLearn() {
-    window.location.href = "/learn";
-  }
-
-  function showPermissionModal() {
-    document.getElementById('permissionModal').style.display = 'flex';
-  }
-
-  function confirmScan() {
-    document.getElementById('permissionModal').style.display = 'none';
-    startScan();
-  }
-
-  function startScan() {
-    const target = document.getElementById('target').value;
-    const start = document.getElementById('start').value;
-    const end = document.getElementById('end').value;
-
-    const timeline = document.getElementById('timeline');
-    timeline.innerHTML = '🔧 Resolving target...<br>';
-
-    fetch('/scan', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ target, start, end })
-    })
-    .then(res => res.json())
-    .then(data => {
-      const geo = data.geo || {};
-      const whois = data.whois || 'No WHOIS data';
-      const ports = data.open_ports?.length ? data.open_ports.join(', ') : 'None';
-      const threat = data.threat || 'Unknown';
-
-      timeline.innerHTML += `🌐 IP: ${data.ip || 'N/A'}<br>`;
-      timeline.innerHTML += `📦 Open Ports: ${ports}<br>`;
-      timeline.innerHTML += `📍 Location: ${geo.city || 'Unknown'}, ${geo.country_name || 'N/A'}<br>`;
-      timeline.innerHTML += `🔎 WHOIS: ${whois.substring(0, 300)}...<br>`;
-      timeline.innerHTML += `⚠️ Threat Level: <strong>${threat}</strong><br>`;
-
-      const threatBar = document.getElementById('threat-bar');
-      threatBar.style.width = threat === "High" ? "100%" : threat === "Medium" ? "60%" : "30%";
-      threatBar.style.background = threat === "High" ? "red" : threat === "Medium" ? "orange" : "lime";
-    })
-    .catch(() => {
-      timeline.innerHTML = '❌ Scan failed. Check your input or try again.';
-    });
-  }
-</script>
-
-</body>
-</html>
-
-
-
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Learn About Ports</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(145deg, #0f0f0f, #1a1a1a);
-      color: #fff;
-      overflow-x: hidden;
-    }
-    header {
-      padding: 2rem;
-      text-align: center;
-      background: rgba(0, 255, 255, 0.1);
-      border-bottom: 2px solid #0ff;
-      box-shadow: 0 0 10px #0ff;
-    }
-    h1 {
-      color: #0ff;
-      text-shadow: 0 0 8px #0ff;
-    }
-    .card {
-      margin: 2rem auto;
-      max-width: 900px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid #0ff;
-      border-radius: 16px;
-      padding: 2rem;
-      backdrop-filter: blur(10px);
-      box-shadow: 0 0 20px #0ff6;
-      transition: transform 0.3s ease;
-    }
-    .card:hover {
-      transform: scale(1.02);
-    }
-    ul {
-      line-height: 1.8;
-    }
-    a {
-      color: #0ff;
-      text-decoration: underline;
-    }
-    .quiz {
-      margin-top: 2rem;
-    }
-    .question {
-      margin-bottom: 1.5rem;
-    }
-    button {
-      padding: 0.6rem 1rem;
-      background: #0ff;
-      color: #000;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      margin-top: 0.5rem;
-    }
-    #result {
-      margin-top: 1rem;
-      color: #0f0;
-      font-weight: bold;
-    }
-  </style>
-</head>
-<body>
-  <header>
-    <h1>🎓 Learn About Ports</h1>
-  </header>
-
-  <div class="card">
-    <p>Ports are virtual points where network connections start and end. Each port is tied to a specific process or service. They're crucial in cybersecurity and network communication.</p>
-
-    <h3>Common Ports</h3>
-    <ul>
-      <li><strong>Port 80:</strong> HTTP (Web traffic)</li>
-      <li><strong>Port 443:</strong> HTTPS (Secure web)</li>
-      <li><strong>Port 22:</strong> SSH (Remote access)</li>
-      <li><strong>Port 53:</strong> DNS (Domain Name System)</li>
-      <li><strong>Port 25:</strong> SMTP (Email sending)</li>
-    </ul>
-
-    <p>You can also learn from these interactive resources:</p>
-    <ul>
-      <li><a href="https://www.cloudflare.com/learning/network-layer/what-is-a-computer-port/" target="_blank">Cloudflare's Guide to Ports</a></li>
-      <li><a href="https://hackertarget.com/nmap-tutorial/" target="_blank">HackerTarget's Nmap Tutorial</a></li>
-    </ul>
-
-    <div class="quiz">
-      <h3>🎯 Quick Quiz</h3>
-      <div class="question">
-        <p>What is the default port for HTTPS?</p>
-        <button onclick="checkAnswer(443)">443</button>
-        <button onclick="checkAnswer(80)">80</button>
-        <button onclick="checkAnswer(22)">22</button>
-      </div>
-      <div id="result"></div>
+  <div id="educationPopup" class="popup">
+    <div class="popup-content">
+      <h2>📚 New to Port Scanning?</h2>
+      <p>Learn about what port scanning is and how it works.</p>
+      <button class="btn" onclick="redirectToLearn()">Learn More</button>
+      <button class="btn" onclick="closePopup()">Dismiss</button>
     </div>
   </div>
+
+  <div id="threat-meter">
+    <div id="threat-bar"></div>
+  </div>
+  <div id="timeline"></div>
 
   <script>
-    function checkAnswer(answer) {
-      const result = document.getElementById('result');
-      if (answer === 443) {
-        result.textContent = "Correct! Port 443 is used for HTTPS.";
-        result.style.color = '#0f0';
-      } else {
-        result.textContent = "Oops! That's not right. Try again.";
-        result.style.color = '#f00';
-      }
+    let popupTimeout = setTimeout(() => {
+      document.getElementById('educationPopup').style.display = 'flex';
+    }, 10000);
+
+    function showPermissionModal() {
+      clearTimeout(popupTimeout);
+      document.getElementById('permissionModal').style.display = 'flex';
+    }
+
+    function confirmScan() {
+      document.getElementById('permissionModal').style.display = 'none';
+      startScan();
+    }
+
+    function startScan() {
+      const target = document.getElementById('target').value;
+      const start = document.getElementById('start').value;
+      const end = document.getElementById('end').value;
+
+      const timeline = document.getElementById('timeline');
+      timeline.innerHTML = '🔍 Scanning...<br>';
+
+      fetch('/scan', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ target, start, end })
+      })
+      .then(res => res.json())
+      .then(data => {
+        timeline.innerHTML = `
+          🌐 IP: ${data.ip}<br>
+          📦 Open Ports: ${data.open_ports.join(', ') || 'None'}<br>
+          📍 Location: ${data.geo.city || 'Unknown'}, ${data.geo.country_name || 'N/A'}<br>
+          🔎 WHOIS: ${data.whois.substring(0, 300)}...<br>
+          ⚠️ Threat Level: <strong>${data.threat}</strong><br>
+        `;
+
+        const threatBar = document.getElementById('threat-bar');
+        threatBar.style.width = data.threat === "High" ? "100%" : data.threat === "Medium" ? "60%" : "30%";
+        threatBar.style.background = data.threat === "High" ? "red" : data.threat === "Medium" ? "orange" : "lime";
+      })
+      .catch(() => {
+        timeline.innerHTML = '❌ Scan failed. Check your input or try again.';
+      });
+    }
+
+    function closePopup() {
+      document.getElementById('educationPopup').style.display = 'none';
+    }
+
+    function redirectToLearn() {
+      window.location.href = "/learn";
     }
   </script>
 </body>
