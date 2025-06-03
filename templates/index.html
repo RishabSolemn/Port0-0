@@ -1,164 +1,236 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>PSX – Port Scanner eXtreme</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap" rel="stylesheet">
   <style>
     body {
       margin: 0;
-      font-family: 'Orbitron', sans-serif;
       background: linear-gradient(135deg, #0f0f0f, #1a1a1a);
       color: #fff;
+      font-family: 'Segoe UI', sans-serif;
       overflow-x: hidden;
+      scroll-behavior: smooth;
     }
-
     header {
       text-align: center;
-      padding: 2rem;
-      font-size: 2rem;
-      color: #00f0ff;
-      text-shadow: 0 0 10px #00f0ff;
+      padding: 3rem;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    header h1 {
+      font-size: 3rem;
+      color: #0ff;
+      text-shadow: 0 0 10px #0ff;
     }
 
     section {
+      padding: 3rem 2rem;
+    }
+
+    .segment {
+      margin: 2rem auto;
       padding: 2rem;
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+      border: 1px solid rgba(0, 255, 255, 0.3);
+      max-width: 900px;
+      transition: 0.3s;
+    }
+
+    .segment:hover {
+      transform: scale(1.02);
+      box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
     }
 
     input, button {
-      padding: 0.5rem;
+      padding: 0.8rem;
       margin: 0.5rem;
+      border-radius: 10px;
       border: none;
-      border-radius: 5px;
+      outline: none;
+      font-size: 1rem;
+    }
+
+    input {
+      background: #222;
+      color: #0ff;
+      border: 1px solid #0ff;
     }
 
     button {
-      background-color: #00f0ff;
-      color: black;
+      background: #0ff;
+      color: #000;
       font-weight: bold;
       cursor: pointer;
-      box-shadow: 0 0 10px #00f0ff;
+      box-shadow: 0 0 10px #0ff;
     }
 
-    #results {
-      margin-top: 2rem;
-      padding: 1rem;
-      background: rgba(255, 255, 255, 0.05);
+    #timeline {
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin-top: 1rem;
+    }
+
+    #threat-meter {
+      height: 20px;
+      background: #333;
       border-radius: 10px;
-      box-shadow: 0 0 15px #00f0ff30;
+      overflow: hidden;
+      margin: 1rem 0;
+    }
+
+    #threat-bar {
+      height: 100%;
+      width: 0;
+      background: lime;
+      transition: width 1s ease;
     }
 
     .contact-card {
-      position: relative;
-      margin-top: 3rem;
-      padding: 2rem;
-      border-radius: 15px;
-      background: rgba(0, 0, 0, 0.3);
+      background: rgba(0, 0, 0, 0.4);
       border: 2px solid #0ff;
+      border-radius: 20px;
+      padding: 2rem;
+      text-align: center;
+      backdrop-filter: blur(15px);
+      color: #fff;
       box-shadow: 0 0 20px #0ff;
-      backdrop-filter: blur(10px);
+      position: relative;
       overflow: hidden;
     }
 
     .contact-card::before {
-      content: "";
+      content: '';
       position: absolute;
       top: -50%;
       left: -50%;
       width: 200%;
       height: 200%;
-      background: url('https://www.transparenttextures.com/patterns/circuits.png');
-      opacity: 0.03;
-      animation: moveTrail 20s linear infinite;
+      background: repeating-linear-gradient(45deg, #0ff 0, #0ff 2px, transparent 2px, transparent 10px);
+      animation: circuit 10s linear infinite;
+      opacity: 0.05;
     }
 
-    @keyframes moveTrail {
-      0% {
-        transform: translate(0, 0);
-      }
-      100% {
-        transform: translate(50%, 50%);
-      }
+    @keyframes circuit {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(100px, 100px); }
     }
 
-    .contact-card h2 {
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background: #111;
+      padding: 2rem;
+      border: 2px solid #0ff;
+      border-radius: 20px;
+      max-width: 500px;
+      text-align: center;
       color: #0ff;
-      margin-bottom: 1rem;
     }
 
-    .contact-card p {
-      margin: 0.3rem 0;
+    .modal-content button {
+      margin-top: 1rem;
     }
 
-    .segment {
-      border-top: 1px solid #222;
-      margin-top: 3rem;
-      padding-top: 2rem;
-    }
   </style>
 </head>
 <body>
 
-  <header>
-    PSX – Port Scanner eXtreme
-  </header>
+<header>
+  <h1>PSX – Port Scanner eXtreme</h1>
+</header>
 
-  <section>
-    <label>Target Domain/IP: <input type="text" id="target" /></label>
-    <label>Start Port: <input type="number" id="start" value="1" /></label>
-    <label>End Port: <input type="number" id="end" value="1024" /></label>
-    <button onclick="startScan()">Scan</button>
+<section class="segment">
+  <h2>🔍 Scan Target</h2>
+  <input type="text" id="target" placeholder="example.com or IP">
+  <input type="number" id="start" placeholder="Start Port" value="1">
+  <input type="number" id="end" placeholder="End Port" value="1024">
+  <button onclick="showPermissionModal()">Scan</button>
+</section>
 
-    <div id="results"></div>
-  </section>
+<section class="segment">
+  <h2>📜 Scan Timeline</h2>
+  <div id="timeline">No scan yet.</div>
+</section>
 
-  <section class="segment">
-    <div class="contact-card">
-      <h2>Contact Card</h2>
-      <p><strong>Email:</strong> Rishabsolemn@gmail.com</p>
-      <p><strong>GitHub:</strong> <a href="https://github.com/RishabSolemn" target="_blank">RishabSolemn</a></p>
-      <p><strong>LinkedIn:</strong> <a href="https://www.linkedin.com/in/rishab-ravikumar-7b3b28368" target="_blank">Rishab Ravikumar</a></p>
-    </div>
-  </section>
+<section class="segment">
+  <h2>⚠️ Threat Meter</h2>
+  <div id="threat-meter"><div id="threat-bar"></div></div>
+</section>
 
-  <script>
-    async function startScan() {
-      const target = document.getElementById("target").value;
-      const start = document.getElementById("start").value;
-      const end = document.getElementById("end").value;
+<section class="segment">
+  <h2>📬 Contact Us</h2>
+  <div class="contact-card">
+    <p><strong>Email:</strong> <a href="mailto:Rishabsolemn@gmail.com" style="color:#0ff;">Rishabsolemn@gmail.com</a></p>
+    <p><strong>GitHub:</strong> <a href="https://github.com/RishabSolemn" target="_blank" style="color:#0ff;">github.com/RishabSolemn</a></p>
+    <p><strong>LinkedIn:</strong> <a href="https://www.linkedin.com/in/rishab-ravikumar-7b3b28368" target="_blank" style="color:#0ff;">Rishab Ravikumar</a></p>
+  </div>
+</section>
 
-      document.getElementById("results").innerHTML = "🔍 Scanning...";
+<div id="permissionModal" class="modal">
+  <div class="modal-content">
+    <h3>⚠️ Permission Required</h3>
+    <p>Do you confirm that you have permission to scan the entered domain/IP?</p>
+    <p>Do you accept full responsibility if you do not?</p>
+    <button onclick="confirmScan()">Yes, Proceed</button>
+    <button onclick="window.close()">No, Exit</button>
+  </div>
+</div>
 
-      try {
-        const response = await fetch("/scan", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            target: target,
-            start: start,
-            end: end
-          })
-        });
+<script>
+  function showPermissionModal() {
+    document.getElementById('permissionModal').style.display = 'flex';
+  }
 
-        if (!response.ok) {
-          throw new Error("Scan failed.");
-        }
+  function confirmScan() {
+    document.getElementById('permissionModal').style.display = 'none';
+    startScan();
+  }
 
-        const data = await response.json();
-        document.getElementById("results").innerHTML = `
-          <p><strong>IP:</strong> ${data.ip}</p>
-          <p><strong>Threat Level:</strong> ${data.threat}</p>
-          <p><strong>Open Ports:</strong> ${data.open_ports.join(", ") || "None found"}</p>
-          <p><strong>Geo Info:</strong> ${data.geo.country_name || "Unavailable"}</p>
-        `;
-      } catch (err) {
-        document.getElementById("results").innerHTML = "❌ Error: " + err.message;
-      }
-    }
-  </script>
+  function startScan() {
+    const target = document.getElementById('target').value;
+    const start = document.getElementById('start').value;
+    const end = document.getElementById('end').value;
+
+    const timeline = document.getElementById('timeline');
+    timeline.innerHTML = '🔧 Resolving target...<br>';
+
+    fetch('/scan', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ target, start, end })
+    })
+    .then(res => res.json())
+    .then(data => {
+      timeline.innerHTML += `🌐 IP: ${data.ip}<br>`;
+      timeline.innerHTML += `📦 Open Ports: ${data.open_ports.join(', ') || 'None'}<br>`;
+      timeline.innerHTML += `📍 Location: ${data.geo.city || 'Unknown'}, ${data.geo.country_name || 'N/A'}<br>`;
+      timeline.innerHTML += `🔎 WHOIS: ${data.whois.substring(0, 300)}...<br>`;
+      timeline.innerHTML += `⚠️ Threat Level: <strong>${data.threat}</strong><br>`;
+
+      const threatBar = document.getElementById('threat-bar');
+      threatBar.style.width = data.threat === "High" ? "100%" : data.threat === "Medium" ? "60%" : "30%";
+      threatBar.style.background = data.threat === "High" ? "red" : data.threat === "Medium" ? "orange" : "lime";
+    })
+    .catch(() => {
+      timeline.innerHTML = '❌ Scan failed. Check your input or try again.';
+    });
+  }
+</script>
 
 </body>
 </html>
