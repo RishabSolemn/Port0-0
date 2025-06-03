@@ -273,3 +273,124 @@
 
 </body>
 </html>
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Learn About Ports</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(145deg, #0f0f0f, #1a1a1a);
+      color: #fff;
+      overflow-x: hidden;
+    }
+    header {
+      padding: 2rem;
+      text-align: center;
+      background: rgba(0, 255, 255, 0.1);
+      border-bottom: 2px solid #0ff;
+      box-shadow: 0 0 10px #0ff;
+    }
+    h1 {
+      color: #0ff;
+      text-shadow: 0 0 8px #0ff;
+    }
+    .card {
+      margin: 2rem auto;
+      max-width: 900px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid #0ff;
+      border-radius: 16px;
+      padding: 2rem;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 0 20px #0ff6;
+      transition: transform 0.3s ease;
+    }
+    .card:hover {
+      transform: scale(1.02);
+    }
+    ul {
+      line-height: 1.8;
+    }
+    a {
+      color: #0ff;
+      text-decoration: underline;
+    }
+    .quiz {
+      margin-top: 2rem;
+    }
+    .question {
+      margin-bottom: 1.5rem;
+    }
+    button {
+      padding: 0.6rem 1rem;
+      background: #0ff;
+      color: #000;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 0.5rem;
+    }
+    #result {
+      margin-top: 1rem;
+      color: #0f0;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🎓 Learn About Ports</h1>
+  </header>
+
+  <div class="card">
+    <p>Ports are virtual points where network connections start and end. Each port is tied to a specific process or service. They're crucial in cybersecurity and network communication.</p>
+
+    <h3>Common Ports</h3>
+    <ul>
+      <li><strong>Port 80:</strong> HTTP (Web traffic)</li>
+      <li><strong>Port 443:</strong> HTTPS (Secure web)</li>
+      <li><strong>Port 22:</strong> SSH (Remote access)</li>
+      <li><strong>Port 53:</strong> DNS (Domain Name System)</li>
+      <li><strong>Port 25:</strong> SMTP (Email sending)</li>
+    </ul>
+
+    <p>You can also learn from these interactive resources:</p>
+    <ul>
+      <li><a href="https://www.cloudflare.com/learning/network-layer/what-is-a-computer-port/" target="_blank">Cloudflare's Guide to Ports</a></li>
+      <li><a href="https://hackertarget.com/nmap-tutorial/" target="_blank">HackerTarget's Nmap Tutorial</a></li>
+    </ul>
+
+    <div class="quiz">
+      <h3>🎯 Quick Quiz</h3>
+      <div class="question">
+        <p>What is the default port for HTTPS?</p>
+        <button onclick="checkAnswer(443)">443</button>
+        <button onclick="checkAnswer(80)">80</button>
+        <button onclick="checkAnswer(22)">22</button>
+      </div>
+      <div id="result"></div>
+    </div>
+  </div>
+
+  <script>
+    function checkAnswer(answer) {
+      const result = document.getElementById('result');
+      if (answer === 443) {
+        result.textContent = "Correct! Port 443 is used for HTTPS.";
+        result.style.color = '#0f0';
+      } else {
+        result.textContent = "Oops! That's not right. Try again.";
+        result.style.color = '#f00';
+      }
+    }
+  </script>
+</body>
+</html>
