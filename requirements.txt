@@ -1,6 +1,5 @@
 Flask
-flask-socketio
-eventlet
 requests
-
-
+dnspython
+python-whois
+ipwhois
