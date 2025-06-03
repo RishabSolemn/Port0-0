@@ -2,235 +2,67 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>PSX – Port Scanner eXtreme</title>
-  <style>
-    body {
-      background: #0d0d0d;
-      color: #00ffff;
-      font-family: monospace;
-      margin: 0;
-      padding: 2rem;
-      scroll-behavior: smooth;
-    }
-
-    input, button {
-      padding: 0.5rem;
-      margin: 0.5rem;
-      border: none;
-      border-radius: 5px;
-    }
-
-    .btn {
-      background: #00ffff;
-      color: #000;
-      cursor: pointer;
-      transition: 0.3s ease;
-      box-shadow: 0 0 10px #00ffff;
-    }
-
-    .btn:hover {
-      background: #00cccc;
-      transform: scale(1.05);
-      box-shadow: 0 0 20px #00ffff;
-    }
-
-    .section {
-      opacity: 0;
-      transform: translateY(50px);
-      transition: opacity 0.8s ease, transform 0.8s ease;
-    }
-
-    .section.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    #threat-meter {
-      width: 100%;
-      background: #333;
-      height: 20px;
-      border-radius: 10px;
-      margin-top: 1rem;
-    }
-
-    #threat-bar {
-      height: 100%;
-      border-radius: 10px;
-      transition: 0.5s ease;
-      width: 0%;
-    }
-
-    .modal, .popup {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.85);
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-    }
-
-    .modal-content, .popup-content {
-      background: #111;
-      padding: 2rem;
-      border-radius: 10px;
-      text-align: center;
-      color: white;
-      box-shadow: 0 0 20px #00ffff;
-    }
-
-    #timeline {
-      margin-top: 2rem;
-      line-height: 1.6;
-      border-left: 2px solid #00ffff;
-      padding-left: 1rem;
-    }
-
-    footer {
-      margin-top: 3rem;
-      border-top: 1px solid #00ffff;
-      padding-top: 2rem;
-      font-size: 0.9rem;
-    }
-
-    .contact-card {
-      background: #111;
-      padding: 1rem;
-      border-radius: 8px;
-      border: 1px solid #00ffff;
-      box-shadow: 0 0 10px #00ffff;
-      max-width: 400px;
-      margin: auto;
-    }
-
-    .contact-card a {
-      color: #00ffff;
-      text-decoration: none;
-      display: block;
-      margin-top: 0.5rem;
-    }
-
-    .contact-card a:hover {
-      text-decoration: underline;
-    }
-  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+  <link rel="stylesheet" href="style.css" />
+  <script defer src="main.js"></script>
 </head>
 <body>
+  <!-- HEADER -->
+  <section class="section" id="header">
+    <h1 class="neon animate__animated animate__fadeInDown">PSX – Port Scanner eXtreme 🔥</h1>
+    <p class="tagline">AI-Powered, Geo-Aware, Gamified Port Scanner</p>
+  </section>
 
-  <h1 class="section">🔎 PSX – Port Scanner eXtreme</h1>
-
-  <div class="section">
-    <input type="text" id="target" placeholder="Target domain/IP" required>
+  <!-- SCANNER FORM -->
+  <section class="section" id="scan-form">
+    <input type="text" id="target" placeholder="Target domain/IP">
     <input type="number" id="start" placeholder="Start Port" value="1">
     <input type="number" id="end" placeholder="End Port" value="100">
-    <button class="btn" onclick="showPermissionModal()">Scan</button>
-  </div>
+    <button class="btn" onclick="showPermissionModal()">Start Scan</button>
+  </section>
 
+  <!-- PERMISSION MODAL -->
   <div id="permissionModal" class="modal">
     <div class="modal-content">
-      <h2>Permission Required</h2>
-      <p>Do you have permission to scan this domain/IP?</p>
+      <h2>🛡️ Permission Required</h2>
+      <p>Are you 16+ and do you have permission to scan this domain/IP?</p>
       <button class="btn" onclick="confirmScan()">Yes, I Accept</button>
       <button class="btn" onclick="window.close()">No</button>
     </div>
   </div>
 
+  <!-- EDUCATION POPUP -->
   <div id="educationPopup" class="popup">
     <div class="popup-content">
       <h2>📚 New to Port Scanning?</h2>
-      <p>Learn about what port scanning is and how it works.</p>
+      <p>Learn about ports, security risks, and best practices.</p>
       <button class="btn" onclick="redirectToLearn()">Learn More</button>
       <button class="btn" onclick="closePopup()">Dismiss</button>
     </div>
   </div>
 
-  <div class="section">
+  <!-- RASENGAN LOADING -->
+  <div id="rasenganLoading" class="loading-screen">
+    <img src="/static/rasengan.gif" alt="Rasengan Loading">
+  </div>
+
+  <!-- RESULTS SECTION -->
+  <section class="section" id="results">
+    <h2>🔍 Scan Results</h2>
+    <div id="timeline"></div>
     <div id="threat-meter">
       <div id="threat-bar"></div>
     </div>
-  </div>
+  </section>
 
-  <div id="timeline" class="section"></div>
-
-  <footer class="section">
-    <div class="contact-card">
-      <h3>📨 Contact Card</h3>
-      <p>Email: <a href="mailto:Rishabsolemn@gmail.com">Rishabsolemn@gmail.com</a></p>
-      <a href="https://github.com/RishabSolemn" target="_blank">GitHub Profile</a>
-      <a href="https://www.linkedin.com/in/rishab-ravikumar-7b3b28368" target="_blank">LinkedIn</a>
-    </div>
-  </footer>
-
-  <script>
-    let popupTimeout = setTimeout(() => {
-      document.getElementById('educationPopup').style.display = 'flex';
-    }, 10000);
-
-    function showPermissionModal() {
-      clearTimeout(popupTimeout);
-      document.getElementById('permissionModal').style.display = 'flex';
-    }
-
-    function confirmScan() {
-      document.getElementById('permissionModal').style.display = 'none';
-      startScan();
-    }
-
-    function startScan() {
-      const target = document.getElementById('target').value;
-      const start = document.getElementById('start').value;
-      const end = document.getElementById('end').value;
-
-      const timeline = document.getElementById('timeline');
-      timeline.innerHTML = '🔍 Scanning...<br>';
-
-      fetch('/scan', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ target, start, end })
-      })
-      .then(res => res.json())
-      .then(data => {
-        timeline.innerHTML = `
-          🌐 IP: ${data.ip}<br>
-          📦 Open Ports: ${data.open_ports.join(', ') || 'None'}<br>
-          📍 Location: ${data.geo.city || 'Unknown'}, ${data.geo.country_name || 'N/A'}<br>
-          🔎 WHOIS: ${data.whois.substring(0, 300)}...<br>
-          ⚠️ Threat Level: <strong>${data.threat}</strong><br>
-        `;
-
-        const threatBar = document.getElementById('threat-bar');
-        threatBar.style.width = data.threat === "High" ? "100%" : data.threat === "Medium" ? "60%" : "30%";
-        threatBar.style.background = data.threat === "High" ? "red" : data.threat === "Medium" ? "orange" : "lime";
-      })
-      .catch(() => {
-        timeline.innerHTML = '❌ Scan failed. Check your input or try again.';
-      });
-    }
-
-    function closePopup() {
-      document.getElementById('educationPopup').style.display = 'none';
-    }
-
-    function redirectToLearn() {
-      window.location.href = "/learn";
-    }
-
-    // Scroll reveal logic
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add("visible");
-        }
-      });
-    }, {
-      threshold: 0.2
-    });
-
-    document.querySelectorAll(".section").forEach((section) => {
-      observer.observe(section);
-    });
-  </script>
+  <!-- CONTACT SECTION -->
+  <section class="section" id="contact">
+    <h2>📬 Contact Card</h2>
+    <p>Email: <a href="mailto:Rishabsolemn@gmail.com">Rishabsolemn@gmail.com</a></p>
+    <p>GitHub: <a href="https://github.com/RishabSolemn" target="_blank">github.com/RishabSolemn</a></p>
+    <p>LinkedIn: <a href="https://www.linkedin.com/in/rishab-ravikumar-7b3b28368" target="_blank">Rishab Ravikumar</a></p>
+  </section>
 </body>
 </html>
