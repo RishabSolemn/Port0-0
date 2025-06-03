@@ -3,3 +3,4 @@ requests
 dnspython
 python-whois
 ipwhois
+ipapi
