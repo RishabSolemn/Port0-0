@@ -1,123 +1,102 @@
-app_py_code = '''
-from flask import Flask, request, render_template, jsonify, send_file
-import socket
+from flask import Flask, request, jsonify, send_file
 import os
 import json
-from datetime import datetime
-import geoip2.database
+import datetime
+import socket
 
 app = Flask(__name__)
-
-# Default ports and their descriptions
-PORT_INFO = {
-    20: ("FTP Data Transfer", 1),
-    21: ("FTP Control", 2),
-    22: ("SSH - Secure Shell", 3),
-    23: ("Telnet - Remote Login", 3),
-    25: ("SMTP - Email Sending", 2),
-    53: ("DNS - Domain Resolution", 1),
-    80: ("HTTP - Web Traffic", 2),
-    110: ("POP3 - Email Receiving", 2),
-    143: ("IMAP - Email Sync", 2),
-    443: ("HTTPS - Secure Web", 1),
-    3306: ("MySQL Database", 3),
-    3389: ("Remote Desktop Protocol", 4),
-    5900: ("VNC - Remote Access", 3),
-    8080: ("Alternative Web Traffic", 2)
-}
-
-# Threat level definitions
-THREAT_LEVELS = {
-    1: ("🟢 Static Breeze", "Idle services, low risk", "#00FFC6"),
-    2: ("🟡 Phantom Echo", "Misconfigured or public services", "#FFE156"),
-    3: ("🟠 Crimson Pulse", "Known vulnerabilities or risks", "#FF6F61"),
-    4: ("🔴 Zero Protocol", "Exploitable services", "#FF3B3B"),
-    5: ("⚫ Blackout Eclipse", "Critical threat", "#191919")
-}
-
-# Scan log to power timeline
 SCAN_LOG = []
 
-@app.route("/")
-def index():
-    return render_template("index.html", threat_levels=THREAT_LEVELS)
+# Threat scoring system
+def get_threat_score(open_ports):
+    count = len(open_ports)
+    if count >= 50:
+        return "High", 90
+    elif count >= 10:
+        return "Medium", 50
+    else:
+        return "Low", 15
+
+# AI-powered port interpretation
+def interpret_port(port):
+    descriptions = {
+        21: "FTP - File Transfer Protocol",
+        22: "SSH - Secure Shell",
+        23: "Telnet - Remote Terminal",
+        25: "SMTP - Email",
+        53: "DNS - Domain Name System",
+        80: "HTTP - Web Traffic",
+        110: "POP3 - Email Retrieval",
+        143: "IMAP - Email Access",
+        443: "HTTPS - Secure Web Traffic",
+        3306: "MySQL Database",
+        3389: "Remote Desktop",
+        8080: "Alternative HTTP"
+    }
+    return descriptions.get(port, "Unknown or uncommon service")
+
+# Fake DNS/CDN deception check
+def check_dns_deception(host):
+    try:
+        ip = socket.gethostbyname(host)
+        return "cdn" in host.lower() or ip.startswith("192.")
+    except:
+        return False
+
+def port_scan(host, ports):
+    open_ports = []
+    for port in ports:
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.settimeout(0.3)
+                if s.connect_ex((host, port)) == 0:
+                    open_ports.append(port)
+        except:
+            continue
+    return open_ports
 
 @app.route("/scan", methods=["POST"])
 def scan():
-    data = request.json
+    data = request.get_json()
     host = data.get("host")
-    results = []
 
     try:
         ip = socket.gethostbyname(host)
-    except Exception as e:
-        return jsonify({"error": f"Could not resolve host: {e}"}), 400
+    except socket.gaierror:
+        return jsonify({"error": "Invalid host"}), 400
 
-    open_ports = 0
-    total_threat_score = 0
+    ports_to_scan = list(range(1, 1025))
+    open_ports = port_scan(ip, ports_to_scan)
+    threat_rating, threat_score = get_threat_score(open_ports)
 
-    for port, (desc, level) in PORT_INFO.items():
-        try:
-            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                s.settimeout(0.5)
-                result = s.connect_ex((host, port))
-                if result == 0:
-                    status = "Open"
-                    open_ports += 1
-                    total_threat_score += level
-                else:
-                    status = "Closed"
+    results = [{
+        "port": port,
+        "status": "open",
+        "description": interpret_port(port),
+        "color": "#FF3B3B" if port < 1024 else "#00ffc6"
+    } for port in open_ports]
 
-                results.append({
-                    "port": port,
-                    "status": status,
-                    "description": desc,
-                    "threat_level": level,
-                    "threat_name": THREAT_LEVELS[level][0],
-                    "threat_description": THREAT_LEVELS[level][1],
-                    "color": THREAT_LEVELS[level][2]
-                })
-        except Exception as e:
-            results.append({
-                "port": port,
-                "status": f"Error: {str(e)}",
-                "description": desc,
-                "threat_level": level,
-                "threat_name": THREAT_LEVELS[level][0],
-                "threat_description": THREAT_LEVELS[level][1],
-                "color": THREAT_LEVELS[level][2]
-            })
+    geo_data = {
+        "city": "Unknown",
+        "region": "Unknown",
+        "country": "Unknown",
+        "latitude": "0.0000",
+        "longitude": "0.0000"
+    }
 
-    threat_rating = "Low" if open_ports < 10 else "Medium" if open_ports < 50 else "High"
-
-    geo_data = {}
-    try:
-        reader = geoip2.database.Reader('GeoLite2-City.mmdb')
-        response = reader.city(ip)
-        geo_data = {
-            "ip": ip,
-            "city": response.city.name,
-            "region": response.subdivisions.most_specific.name,
-            "country": response.country.name,
-            "latitude": response.location.latitude,
-            "longitude": response.location.longitude
-        }
-    except:
-        geo_data = {"ip": ip, "error": "GeoIP lookup failed or database missing"}
-
-    scan_record = {
-        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+    result = {
         "host": host,
         "ip": ip,
-        "open_ports": open_ports,
-        "threat_score": total_threat_score,
+        "timestamp": datetime.datetime.now().isoformat(),
         "threat_rating": threat_rating,
+        "threat_score": threat_score,
+        "results": results,
         "geo_data": geo_data,
-        "results": results
+        "dns_deception": check_dns_deception(host)
     }
-    SCAN_LOG.append(scan_record)
 
-    return jsonify(scan_record)
+    SCAN_LOG.append(result)
+    return jsonify(result)
 
 @app.route("/download-log")
 def download_log():
@@ -133,6 +112,3 @@ def scan_log():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
-'''
-
-app_py_code
