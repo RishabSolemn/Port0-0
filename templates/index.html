@@ -48,6 +48,110 @@
     section {
       padding: 4rem 1rem;
     }
+
+    .contact-section {
+  padding: 60px 20px;
+  position: relative;
+  background: #000 url('https://www.transparenttextures.com/patterns/circuit-pattern.png') repeat;
+  background-size: cover;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.contact-bg::before {
+  content: '';
+  position: absolute;
+  top: -100%;
+  left: -100%;
+  width: 300%;
+  height: 300%;
+  background: radial-gradient(circle, rgba(0, 255, 255, 0.15), transparent 40%);
+  animation: lightTrail 10s linear infinite;
+  z-index: 0;
+}
+
+@keyframes lightTrail {
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(33%, 33%);
+  }
+}
+
+.glassy-glow {
+  position: relative;
+  max-width: 500px;
+  margin: auto;
+  padding: 30px;
+  border-radius: 20px;
+  background: rgba(15, 20, 30, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 255, 255, 0.25);
+  box-shadow: 0 0 12px rgba(0, 255, 255, 0.3);
+  color: #e0f7ff;
+  font-family: 'Orbitron', sans-serif;
+  transition: all 0.4s ease;
+  z-index: 1;
+}
+
+.glassy-glow::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  padding: 2px;
+  background: linear-gradient(135deg, #00f0ff, #0ff, #00f0ff);
+  background-size: 400% 400%;
+  animation: borderFlow 6s ease infinite;
+  z-index: -1;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  -webkit-mask-composite: destination-out;
+}
+
+@keyframes borderFlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.glassy-glow h2 {
+  margin-bottom: 25px;
+  color: #00ffff;
+  font-size: 1.8em;
+}
+
+.glassy-glow p {
+  margin: 10px 0;
+  font-size: 1.05em;
+}
+
+.glassy-glow a {
+  color: #00f0ff;
+  text-decoration: none;
+  font-weight: bold;
+  transition: color 0.3s, text-shadow 0.3s;
+}
+
+.glassy-glow a:hover {
+  color: #ffffff;
+  text-shadow: 0 0 5px #0ff, 0 0 12px #0ff;
+}
+
+.glassy-glow i {
+  margin-right: 10px;
+  color: #0ff;
+}
+
   </style>
 </head>
 <body>
@@ -120,5 +224,17 @@
       }, 2000);
     }
   </script>
+
+  <section id="contact" class="contact-section" data-aos="fade-up">
+  <div class="contact-bg">
+    <div class="contact-card glassy-glow">
+      <h2>📡 Contact Us</h2>
+      <p><i class="fas fa-envelope"></i> <a href="mailto:Rishabsolemn@gmail.com">Rishabsolemn@gmail.com</a></p>
+      <p><i class="fab fa-github"></i> <a href="https://github.com/RishabSolemn" target="_blank">GitHub Profile</a></p>
+      <p><i class="fab fa-linkedin"></i> <a href="https://www.linkedin.com/in/rishab-ravikumar-7b3b28368" target="_blank">LinkedIn Profile</a></p>
+    </div>
+  </div>
+</section>
+
 </body>
 </html>
